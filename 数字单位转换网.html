@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数字转换器转换器（最终版）</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .preformatted {
+                white-space: pre-wrap;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+            }
+            .highlight-diff {
+                background-color: #dcfce7;
+                padding: 0 2px;
+                border-radius: 2px;
+            }
+            /* 下拉框样式 */
+            .custom-select {
+                position: relative;
+                display: inline-block;
+                width: 100%;
+            }
+            .custom-select select {
+                appearance: none;
+                -webkit-appearance: none;
+                -moz-appearance: none;
+                width: 100%;
+                padding-right: 2.5rem !important;
+            }
+            .custom-select::after {
+                content: "\f078";
+                font-family: "FontAwesome";
+                position: absolute;
+                right: 0.75rem;
+                top: 50%;
+                transform: translateY(-50%);
+                pointer-events: none;
+                color: #6b7280;
+                font-size: 0.75rem;
+                z-index: 1;
+            }
+            /* 滚动容器样式 */
+            .scroll-container {
+                max-height: 320px;
+                overflow-y: auto;
+                scrollbar-width: thin;
+            }
+            
+            .scroll-container::-webkit-scrollbar {
+                width: 8px !important;
+                height: 8px !important;
+                display: block !important;
+            }
+            
+            .scroll-container::-webkit-scrollbar-track {
+                background: #f1f1f1 !important;
+                border-radius: 4px !important;
+            }
+            
+            .scroll-container::-webkit-scrollbar-thumb {
+                background: #c1c1c1 !important;
+                border-radius: 4px !important;
+            }
+            
+            .scroll-container::-webkit-scrollbar-thumb:hover {
+                background: #a1a1a1 !important;
+            }
+            
+            .content-wrapper {
+                padding-right: 12px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- 顶部导航 -->
+    <header class="bg-white shadow-md fixed w-full top-0 z-50 transition-all duration-300">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fa fa-calculator text-blue-600 text-2xl"></i>
+                <h1 class="text-xl md:text:text-2xl font-bold text-gray-800">数字单位转换器</h1>
+            </div>
+            <div class="hidden md:flex items-center space-x-4">
+                <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-100 transition-colors">
+                    <i class="fa fa-moon-o text-gray-600"></i>
+                </button>
+                <button id="help-btn" class="p-2 rounded-full hover:bg-gray-100 transition-colors">
+                    <i class="fa fa-question-circle text-gray-600"></i>
+                </button>
+            </div>
+            <button class="md:hidden p-2 rounded-full hover:bg-gray-100 transition-colors" id="mobile-menu-btn">
+                <i class="fa fa-bars text-gray-600"></i>
+            </button>
+        </div>
+        
+        <!-- 移动端菜单 -->
+        <div class="md:hidden hidden bg-white border-t" id="mobile-menu">
+            <div class="container mx-auto px-4 py-2 flex justify-around">
+                <button id="mobile-theme-toggle" class="p-2 rounded-full hover:bg-gray-100 transition-colors">
+                    <i class="fa fa-moon-o text-gray-600"></i>
+                </button>
+                <button id="mobile-helpelp-btn" class="p-2 rounded-full hover:bg-gray-100 transition-colors">
+                    <i class="fa fa-question-circle text-gray-600"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <main class="container mx-auto px-4 pt-24 pb-16">
+        <!-- 转换设置区 -->
+        <div class="bg-white rounded-xl-xl shadow shadow-lg p-6 mb-8">
+            <h2 class="text-lg font-semibold mb-4 text-gray-800 flex items-center">
+                <i class="fa fa-sliders text-blue-600 mr-2"></i>转换设置
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- 转换单位 -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">转换单位</label>
+                    <div class="custom-select">
+                        <select id="unit-select" class="block w-full pl-3 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-lg">
+                            <option value="1">元 (÷1)</option>
+                            <option value="10000">万 (÷10000)</option>
+                            <option value="10000000">千万 (÷10000000)</option>
+                            <option value="100000000">亿 (÷100000000)</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- 小数位数 -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">小数位数</label>
+                    <div class="custom-select">
+                        <select id="decimal-select" class="block w-full pl-3 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-lg">
+                            <option value="0">0位</option>
+                            <option value="1">1位</option>
+                            <option value="2" selected>2位</option>
+                            <option value="3">3位</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- 转换方向 -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">转换方向</label>
+                    <div class="custom-select">
+                        <select id="direction-select" class="block w-full pl-3 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-lg">
+                            <option value="toUnit">原单位 → 目标单位</option>
+                            <option value="fromUnit">目标单位 → 原单位</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 输入输出区域 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- 输入区域 -->
+            <div class="bg-white shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl">
+                <div class="bg-blue-600 px-6 py-4">
+                    <h3 class="text-white font-semibold flex items-center">
+                        <i class="fa fa-pencil mr-2"></i>输入文本
+                    </h3>
+                </div>
+                <div class="p-6">
+                    <div class="relative">
+                        <textarea 
+                            id="input-text" 
+                            class="w-full h-64 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"
+                            placeholder="请在此输入包含数字的文本..."></textarea>
+                        <div class="absolute right-3 top-3 text-xs px-2 py-1 bg-gray-100 rounded-md text-gray-600" id="input-stats">
+                            0个字
+                        </div>
+                    </div>
+                    <div class="mt-4 flex flex-wrap gap-3">
+                        <button id="convert-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-all flex items-center shadow-md hover:shadow-lg">
+                            <i class="fa fa-exchange mr-2"></i>转换数字
+                        </button>
+                        <button id="clear-input-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg font-medium transition-all flex items-center">
+                            <i class="fa fa-trash mr-2"></i>清空输入
+                        </button>
+                        <button id="sample-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg font-medium transition transition-all flex items-center">
+                            <i class="fa fa-file-text-o mr-2"></i>示例文本
+                        </button>
+                        <button id="clear-format-btn" class="bg-green-100 hover:bg-green-200 text-green-800 px-4 py-2 rounded-lg font-medium transition-all flex items-center">
+                            <i class="fa fa-eraser mr-2"></i>清除格式
+                        </button>
+                        <button id="remove-units-btn" class="bg-green-100 hover:bg-green-200 text-green-800 px-4 py-2 rounded-lg font-medium transition-all flex items-center">
+                            <i class="fa fa-cut mr-2"></i>移除单位
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 输出区域 -->
+            <div class="bg-white shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl">
+                <div class="bg-green-600 px-6 py-4 flex justify-between items-center">
+                    <h3 class="text-white font-semibold flex items-center">
+                        <i class="fa fa-edit mr-2"></i>转换结果
+                    </h3>
+                    <button id="view-mode-btn" class="text-white text-sm flex items-center bg-green-700 hover:bg-green-800 px-3 py-1 rounded transition-colors">
+                        <i class="fa fa-eye mr-1"></i>
+                        <span id="view-mode-text">切换对比模式</span>
+                    </button>
+                </div>
+                <div class="p-6">
+                    <!-- 普通视图 -->
+                    <div id="normal-view">
+                        <textarea 
+                            id="output-container" 
+                            class="w-full h-64 p-4 border border-gray-300 rounded-lg overflow-auto bg-gray-50 preformatted focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all resize-none"
+                            placeholder="转换后的结果将显示在这里，您可以直接编辑..."></textarea>
+                    </div>
+                    
+                    <!-- 对比视图 -->
+                    <div id="compare-view" class="hidden">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <p class="text-sm font-medium text-gray-700">原始文本</p>
+                                    <span class="text-xs text-gray-500" id="original-count">0 个字</span>
+                                </div>
+                                <div class="p-4 border border-gray-300 rounded-lg bg-gray-50">
+                                    <div id="original-compare" class="preformatted text-sm scroll-container content-wrapper"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <p class="text-sm font-medium text-gray-700">转换后（带单位）</p>
+                                    <span class="text-xs text-gray-500" id="converted-count">0 个字</span>
+                                </div>
+                                <div class="p-4 border border-gray-300 rounded-lg bg-gray-50">
+                                    <div id="converted-compare" class="preformatted text-sm scroll-container content-wrapper"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 flex flex-wrap gap-3">
+                        <button id="copy-all-btn" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-all flex items-center shadow-md hover:shadow-lg" disabled>
+                            <i class="fa fa-copy mr-2"></i>复制全部
+                        </button>
+                        <button id="copy-numbers-btn" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium transition-all flex items-center" disabled>
+                            <i class="fa fa-hashtag mr-2"></i>只复制数字
+                        </button>
+                        <button id="export-txt-btn" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg font-medium transition-all flex items-center" disabled>
+                            <i class="fa fa-download mr-2"></i>导出TXT
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 提取的数字列表 -->
+        <div id="extracted-numbers-container" class="mt-8 bg-white rounded-xl shadow-lg p-6 hidden">
+            <h3 class="text-lg font-semibold mb-4 text-gray-800 flex items-center">
+                <i class="fa fa-list-ol text-orange-500 mr-2"></i>提取的数字结果
+            </h3>
+            <div class="p-4 border border-gray-200 rounded-lg bg-gray-50 max-h-40 overflow-auto">
+                <ul id="extracted-numbers-list" class="space-y-1 text-gray-700">
+                    <!-- 提取的数字将在这里显示 -->
+                </ul>
+            </div>
+        </div>
+
+        <!-- 操作提示 -->
+        <div class="mt-6 bg-blue-50 p-3 rounded text-sm text-blue-700">
+            <i class="fa fa-info-circle mr-1"></i> 提示：支持快捷键 <kbd class="px-2 py-1 bg-white border rounded text-xs">Ctrl+Z</kbd> 撤销 和 <kbd class="px-2 py-1 bg-white border rounded text-xs">Ctrl+Y</kbd> 重做 操作
+        </div>
+    </main>
+
+    <script>
+        // 单位映射关系
+        const unitMap = {
+            '1': '元',
+            '10000': '万',
+            '10000000': '千万',
+            '100000000': '亿'
+        };
+        
+        // 核心变量
+        let conversionHistory = [];
+        let historyIndex = -1;
+        let currentInput = '';
+        let extractedNumbersWithoutUnits = []; // 存储不包含单位的提取数字
+        
+        // DOM元素
+        const inputText = document.getElementById('input-text');
+        const outputContainer = document.getElementById('output-container');
+        const inputStats = document.getElementById('input-stats');
+        const convertBtn = document.getElementById('convert-btn');
+        const clearInputBtn = document.getElementById('clear-input-btn');
+        const sampleBtn = document.getElementById('sample-btn');
+        const copyAllBtn = document.getElementById('copy-all-btn');
+        const copyNumbersBtn = document.getElementById('copy-numbers-btn');
+        const exportTxtBtn = document.getElementById('export-txt-btn');
+        const extractedNumbersContainer = document.getElementById('extracted-numbers-container');
+        const extractedNumbersList = document.getElementById('extracted-numbers-list');
+        const unitSelect = document.getElementById('unit-select');
+        const decimalSelect = document.getElementById('decimal-select');
+        const directionSelect = document.getElementById('direction-select');
+        const clearFormatBtn = document.getElementById('clear-format-btn');
+        const removeUnitsBtn = document.getElementById('remove-units-btn');
+        const viewModeBtn = document.getElementById('view-mode-btn');
+        const viewModeText = document.getElementById('view-mode-text');
+        const normalView = document.getElementById('normal-view');
+        const compareView = document.getElementById('compare-view');
+        const originalCompare = document.getElementById('original-compare');
+        const convertedCompare = document.getElementById('converted-compare');
+        const originalCount = document.getElementById('original-count');
+        const convertedCount = document.getElementById('converted-count');
+
+        // 示例文本
+        const sampleText = `财务数据示例：
+
+1. 季度营收：
+   - Q1： 1,234,567.89 元
+   - Q2： 2,345,678.90 元
+   - Q3： 3,456,789.01 元
+   - Q4： 4,567,890.12 元
+
+2. 成本支出：
+   - 人力成本： 2,500,000 元
+   - 运营成本： 1,850,678.34 元
+   - 营销成本： 987,654.32 元
+   - 管理成本： 567,890.12 元
+   - 财务成本： 345,678.90 元
+
+3. 利润分析：
+   - 总利润： 6,266,893.26 元
+   - 利润率： 28.75%
+   - 同比增长：15.32%
+   - 环比增长：8.76%`;
+
+        // 初始化事件监听
+        function init() {
+            // 实时更新输入统计
+            inputText.addEventListener('input', () => {
+                inputStats.textContent = `${inputText.value.length}个字`;
+            });
+
+            // 转换按钮
+            convertBtn.addEventListener('click', convertNumbers);
+            
+            // 清除输入
+            clearInputBtn.addEventListener('click', () => {
+                inputText.value = '';
+                outputContainer.value = '';
+                inputStats.textContent = '0个字';
+                extractedNumbersContainer.classList.add('hidden');
+                [copyAllBtn, copyNumbersBtn, exportTxtBtn].forEach(btn => btn.disabled = true);
+                conversionHistory = [];
+                historyIndex = -1;
+                currentInput = '';
+                extractedNumbersWithoutUnits = [];
+            });
+
+            // 示例文本
+            sampleBtn.addEventListener('click', () => {
+                inputText.value = sampleText;
+                inputStats.textContent = `${inputText.value.length}个字`;
+            });
+
+            // 复制全部
+            copyAllBtn.addEventListener('click', () => {
+                copyToClipboard(outputContainer.value, '复制全部成功');
+            });
+
+            // 只复制数字 - 修复此功能
+            copyNumbersBtn.addEventListener('click', () => {
+                if (extractedNumbersWithoutUnits.length === 0) {
+                    showNotification('没有可复制的数字', false);
+                    return;
+                }
+                
+                // 使用存储的不含单位的数字数组
+                const numbers = extractedNumbersWithoutUnits.join('\n');
+                copyToClipboard(numbers, '复制数字成功');
+            });
+
+            // 通用复制函数
+            function copyToClipboard(text, successMsg) {
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(text)
+                        .then(() => showNotification(successMsg))
+                        .catch(() => fallbackCopyTextToClipboard(text, successMsg));
+                } else {
+                    fallbackCopyTextToClipboard(text, successMsg);
+                }
+            }
+
+            // 复制降级方案
+            function fallbackCopyTextToClipboard(text, successMsg) {
+                const textArea = document.createElement("textarea");
+                textArea.value = text;
+                textArea.style.position = "fixed";
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+
+                try {
+                    const successful = document.execCommand('copy');
+                    if (successful) {
+                        showNotification(successMsg);
+                    } else {
+                        showNotification('复制失败，请手动复制', false);
+                    }
+                } catch (err) {
+                    showNotification('复制失败，请手动复制', false);
+                }
+
+                document.body.removeChild(textArea);
+            }
+
+            // 清除格式
+            clearFormatBtn.addEventListener('click', () => {
+                inputText.value = inputText.value
+                    .replace(/\s+/g, ' ')
+                    .replace(/ +/g, ' ')
+                    .trim();
+                showNotification('格式已清除');
+            });
+
+            // 移除单位
+            removeUnitsBtn.addEventListener('click', () => {
+                const units = ['元', '万', '千万', '亿', '美元', '欧元'];
+                let text = inputText.value;
+                units.forEach(unit => {
+                    text = text.replace(new RegExp(unit, 'g'), '');
+                });
+                inputText.value = text;
+                showNotification('已移除常见单位');
+            });
+
+            // 切换视图模式
+            viewModeBtn.addEventListener('click', () => {
+                normalView.classList.toggle('hidden');
+                compareView.classList.toggle('hidden');
+                
+                if (compareView.classList.contains('hidden')) {
+                    viewModeText.textContent = '切换对比模式';
+                } else {
+                    viewModeText.textContent = '切换普通模式';
+                    // 更新对比视图内容
+                    if (currentInput) {
+                        updateCompareView(currentInput, outputContainer.value);
+                    }
+                }
+            });
+
+            // 导出TXT
+            exportTxtBtn.addEventListener('click', () => {
+                const blob = new Blob([outputContainer.value], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = '数字转换结果.txt';
+                a.click();
+                URL.revokeObjectURL(url);
+                showNotification('已导出为TXT文件');
+            });
+
+            // 输出框编辑时更新提取的数字
+            outputContainer.addEventListener('input', () => {
+                extractNumbersFromText(outputContainer.value);
+                if (!compareView.classList.contains('hidden')) {
+                    updateCompareView(currentInput, outputContainer.value);
+                }
+            });
+
+            // 转换设置变化时重新转换（如果已有内容）
+            [unitSelect, decimalSelect, directionSelect].forEach(el => {
+                el.addEventListener('change', () => {
+                    if (currentInput && currentInput.trim()) {
+                        convertNumbers();
+                    }
+                });
+            });
+
+            // 撤销/重做快捷键
+            document.addEventListener('keydown', (e) => {
+                // Ctrl+Z 撤销
+                if (e.ctrlKey && e.key === 'z' && historyIndex > 0) {
+                    e.preventDefault();
+                    historyIndex--;
+                    const { input, output } = conversionHistory[historyIndex];
+                    inputText.value = input;
+                    outputContainer.value = output;
+                    extractNumbersFromText(output);
+                    updateCompareView(input, output);
+                    showNotification('已撤销');
+                }
+                // Ctrl+Y 重做
+                if (e.ctrlKey && e.key === 'y' && historyIndex < conversionHistory.length - 1) {
+                    e.preventDefault();
+                    historyIndex++;
+                    const { input, output } = conversionHistory[historyIndex];
+                    inputText.value = input;
+                    outputContainer.value = output;
+                    extractNumbersFromText(output);
+                    updateCompareView(input, output);
+                    showNotification('已重做');
+                }
+            });
+        }
+
+        // 计算文本字数
+        function countCharacters(text) {
+            return text.length;
+        }
+
+        // 转换数字函数
+        function convertNumbers() {
+            const text = inputText.value.trim();
+            if (!text) {
+                showNotification('请输入需要转换的内容', false);
+                return;
+            }
+            
+            currentInput = text;
+            const unitValue = unitSelect.value;
+            const unitName = unitMap[unitValue];
+            const unit = parseInt(unitValue);
+            const decimals = parseInt(decimalSelect.value);
+            const direction = directionSelect.value;
+            
+            // 保存历史记录
+            saveToHistory(text, outputContainer.value);
+            
+            // 执行转换
+            let convertedText = text;
+            extractedNumbersWithoutUnits = []; // 重置无单位数字数组
+            
+            // 匹配文本中的所有数字（包括带逗号分隔符的）
+            convertedText = convertedText.replace(/(-?\d+(?:[ ,]\d+)*)(?:\.\d+)?/g, (match) => {
+                // 清理数字格式（去除空格和逗号）
+                const cleanNum = parseFloat(match.replace(/[ ,]/g, ''));
+                if (isNaN(cleanNum)) return match;
+                
+                // 根据方向计算转换结果
+                const converted = direction === 'toUnit' 
+                    ? cleanNum / unit 
+                    : cleanNum * unit;
+                
+                // 保留指定小数位数
+                const rounded = Number(converted.toFixed(decimals));
+                extractedNumbersWithoutUnits.push(rounded.toString()); // 只保存数字，不包含单位
+                
+                // 返回带单位的结果
+                return `${rounded}${unitName}`;
+            });
+            
+            // 更新界面
+            outputContainer.value = convertedText;
+            updateExtractedNumbers(extractedNumbersWithoutUnits); // 显示无单位数字
+            updateCompareView(text, convertedText);
+            
+            // 启用按钮
+            [copyAllBtn, copyNumbersBtn, exportTxtBtn].forEach(btn => btn.disabled = false);
+            extractedNumbersContainer.classList.remove('hidden');
+            
+            showNotification('转换完成');
+        }
+
+        // 提取数字（分离数字和单位）
+        function extractNumbersFromText(text) {
+            // 匹配带单位的数字
+            const numberRegex = /-?\d+\.?\d*[元万千亿]*/g;
+            const matches = text.match(numberRegex) || [];
+            
+            // 分离数字和单位
+            extractedNumbersWithoutUnits = matches.map(match => {
+                // 去除任何单位字符，只保留数字
+                return match.replace(/[元万千亿]/g, '');
+            });
+            
+            updateExtractedNumbers(extractedNumbersWithoutUnits);
+            return extractedNumbersWithoutUnits;
+        }
+
+        // 更新提取的数字列表（只显示数字，不含单位）
+        function updateExtractedNumbers(numbers) {
+            if (numbers.length === 0) {
+                extractedNumbersList.innerHTML = '<li class="text-gray-500 italic">未找到数字</li>';
+                return;
+            }
+            
+            extractedNumbersList.innerHTML = numbers.map((num, i) => 
+                `<li class="flex items-center"><span class="inline-block w-6 text-gray-400 mr-2">${i+1}.</span> <span class="text-orange-600">${num}</span></li>`
+            ).join('');
+        }
+
+        // 更新对比视图
+        function updateCompareView(original, converted) {
+            // 更新内容
+            originalCompare.textContent = original;
+            
+            // 高亮显示转换后的数字（带单位）
+            let highlighted = converted;
+            highlighted = highlighted.replace(/-?\d+\.?\d*[元万千亿]+/g, (num) => 
+                `<span class="highlight-diff">${num}</span>`
+            );
+            convertedCompare.innerHTML = highlighted;
+            
+            // 更新字数统计
+            originalCount.textContent = `${countCharacters(original)} 个字`;
+            convertedCount.textContent = `${countCharacters(converted)} 个字`;
+            
+            // 重置滚动位置到顶部
+            originalCompare.scrollTop = 0;
+            convertedCompare.scrollTop = 0;
+        }
+
+        // 保存历史记录
+        function saveToHistory(input, output) {
+            // 如果历史记录超过当前索引，截断历史记录
+            conversionHistory = conversionHistory.slice(0, historyIndex + 1);
+            // 添加新记录
+            conversionHistory.push({ input, output });
+            // 更新当前索引
+            historyIndex = conversionHistory.length - 1;
+            // 限制历史记录数量为20条
+            if (conversionHistory.length > 20) {
+                conversionHistory.shift();
+                historyIndex--;
+            }
+        }
+
+        // 显示通知
+        function showNotification(message, isSuccess = true) {
+            // 创建通知元素
+            const notification = document.createElement('div');
+            notification.className = `fixed bottom-6 right-6 px-6 py-3 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 flex items-center z-50 ${isSuccess ? 'bg-green-500' : 'bg-red-500'} text-white`;
+            
+            const icon = document.createElement('i');
+            icon.className = `mr-2 ${isSuccess ? 'fa fa-check-circle' : 'fa fa-exclamation-circle'}`;
+            
+            const text = document.createElement('span');
+            text.textContent = message;
+            
+            notification.appendChild(icon);
+            notification.appendChild(text);
+            document.body.appendChild(notification);
+            
+            // 显示通知
+            setTimeout(() => {
+                notification.classList.remove('translate-y-20', 'opacity-0');
+                notification.classList.add('translate-y-0', 'opacity-100');
+            }, 10);
+            
+            // 隐藏通知
+            setTimeout(() => {
+                notification.classList.remove('translate-y-0', 'opacity-100');
+                notification.classList.add('translate-y-20', 'opacity-0');
+                
+                // 移除元素
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        // 初始化应用
+        init();
+    </script>
+</body>
+</html>
+    
