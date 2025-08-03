@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="baidu-site-verification" content="codeva-H3EAxp7uRm" />
-    <title>批量数字单位转换工具｜支持自动四舍五入、保留两位小数、文本识别 - mxkkl.com.cn</title>
-    <meta name="description" content="一款专为职场人士打造的数字单位转换工具，支持将文本中的数值批量转换为万元单位、四舍五入保留两位小数，适用于项目申报、财务报表、数据汇总等高频办公场景。">
-    <meta name="keywords" content="数字单位转换, 批量数字转换工具, 万元单位转换, 四舍五入工具, 项目申报数字处理, 财务报表规范化">
+   <title>批量数字单位转换工具｜支持自动四舍五入、保留两位小数、文本识别 - mxkkl.com.cn</title>
+    <meta name="description" content="mxkkl.com.cn数字数字单位转换器，支持批量转换、添加备注、保存历史记录，自动数字总数和总和统计，方便管理不同企业财务数据。">
+    <meta name="keywords" content="数字单位转换器, 数据保存, 财务数据记录, 带备注转换工具, 数字统计">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     
@@ -31,7 +31,7 @@
                 border-radius: 2px;
                 font-weight: 500;
             }
-            /* 下拉框样式 */
+            /* 下拉框样式优化 */
             .custom-select {
                 position: relative;
                 display: inline-block;
@@ -43,6 +43,11 @@
                 -moz-appearance: none;
                 width: 100%;
                 padding-right: 2.5rem !important;
+                transition: all 0.2s ease;
+            }
+            .custom-select select:focus {
+                border-color: #6366f1;
+                box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
             }
             .custom-select::after {
                 content: "\f078";
@@ -55,13 +60,17 @@
                 color: #6b7280;
                 font-size: 0.75rem;
                 z-index: 1;
+                transition: color 0.2s ease;
             }
-            /* 滚动容器样式 - 确保两个框大小一致并显示滚动轴 */
+            .custom-select:hover::after {
+                color: #6366f1;
+            }
+            /* 滚动容器样式 */
             .scroll-container {
                 max-height: 320px;
                 overflow-y: auto;
                 scrollbar-width: thin;
-                min-height: 320px; /* 确保两个框高度一致 */
+                min-height: 320px;
             }
             
             .scroll-container::-webkit-scrollbar {
@@ -70,7 +79,7 @@
                 display: block !important;
             }
             
-            .scroll-container::-webkit-scrollbar-track {
+            .scroll-container-container::-webkit-scrollbar-track {
                 background: #f1f1f1 !important;
                 border-radius: 4px !important;
             }
@@ -100,6 +109,49 @@
                 border-radius: 4px;
                 transition: width 0.5s ease;
             }
+            /* 历史记录样式 */
+            .history-item {
+                transition: all 0.2s ease;
+            }
+            .history-item:hover {
+                transform: translateX(4px);
+            }
+            .history-item-active {
+                border-left: 3px solid #6366f1;
+                background-color: #f5f5f7;
+            }
+            /* 突出显示保存按钮 */
+            .save-button {
+                background: linear-gradient(135deg, #4338ca 0%, #6366f1 100%) !important;
+                box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3) !important;
+            }
+            .save-button:hover {
+                background: linear-gradient(135deg, #3730a3 0%, #4f46e5 100%) !important;
+                box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4) !important;
+                transform: translateY(-1px) !important;
+            }
+            /* 转换设置区域优化 */
+            .setting-item {
+                background-color: #f9fafb;
+                border-radius: 8px;
+                padding: 1rem;
+                transition: all 0.2s ease;
+            }
+            .setting-item:hover {
+                background-color: #f3f4f6;
+                transform: translateY(-1px);
+            }
+            .setting-label {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                margin-bottom: 0.5rem;
+            }
+            .setting-icon {
+                color: #6366f1;
+                font-size: 1rem;
+                width: 1.25rem;
+            }
         }
     </style>
 </head>
@@ -112,6 +164,9 @@
                 <h1 class="text-xl md:text:text-2xl font-bold text-gray-800">批量数字单位转换工具</h1>
             </div>
             <div class="hidden md:flex items-center space-x-4">
+                <button id="history-btn" class="p-2 rounded-full hover:bg-gray-100 transition-colors">
+                    <i class="fa fa-history text-gray-600"></i>
+                </button>
                 <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-100 transition-colors">
                     <i class="fa fa-moon-o text-gray-600"></i>
                 </button>
@@ -127,6 +182,9 @@
         <!-- 移动端菜单 -->
         <div class="md:hidden hidden bg-white border-t" id="mobile-menu">
             <div class="container mx-auto px-4 py-2 flex justify-around">
+                <button id="mobile-history-btn" class="p-2 rounded-full hover:bg-gray-100 transition-colors">
+                    <i class="fa fa-history text-gray-600"></i>
+                </button>
                 <button id="mobile-theme-toggle" class="p-2 rounded-full hover:bg-gray-100 transition-colors">
                     <i class="fa fa-moon-o text-gray-600"></i>
                 </button>
@@ -139,18 +197,21 @@
 
     <!-- 主内容区 -->
     <main class="container mx-auto px-4 pt-24 pb-16">
-        <!-- 转换设置区 -->
+        <!-- 转换设置区 - 优化后的UI -->
         <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
             <h2 class="text-lg font-semibold mb-4 text-gray-800 flex items-center">
                 <i class="fa fa-sliders text-blue-600 mr-2"></i>转换设置
             </h2>
             
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
                 <!-- 转换单位 -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">转换单位</label>
+                <div class="setting-item">
+                    <label class="block text-sm font-medium text-gray-700 setting-label">
+                        <i class="fa fa-balance-scale setting-icon"></i>
+                        转换单位
+                    </label>
                     <div class="custom-select">
-                        <select id="unit-select" class="block w-full pl-3 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-lg">
+                        <select id="unit-select" class="block w-full pl-3 py-2.5 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-lg">
                             <option value="1">元 (÷1)</option>
                             <option value="10000">万 (÷10000)</option>
                             <option value="10000000">千万 (÷10000000)</option>
@@ -158,11 +219,15 @@
                         </select>
                     </div>
                 </div>
+                
                 <!-- 小数位数 -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">小数位数</label>
+                <div class="setting-item">
+                    <label class="block text-sm font-medium text-gray-700 setting-label">
+                        <i class="fa fa-decimal setting-icon"></i>
+                        小数位数
+                    </label>
                     <div class="custom-select">
-                        <select id="decimal-select" class="block w-full pl-3 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-lg">
+                        <select id="decimal-select" class="block w-full pl-3 py-2.5 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-lg">
                             <option value="0">0位</option>
                             <option value="1">1位</option>
                             <option value="2" selected>2位</option>
@@ -170,11 +235,15 @@
                         </select>
                     </div>
                 </div>
+                
                 <!-- 转换方向 -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">转换方向</label>
+                <div class="setting-item">
+                    <label class="block text-sm font-medium text-gray-700 setting-label">
+                        <i class="fa fa-exchange setting-icon"></i>
+                        转换方向
+                    </label>
                     <div class="custom-select">
-                        <select id="direction-select" class="block w-full pl-3 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-lg">
+                        <select id="direction-select" class="block w-full pl-3 py-2.5 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-lg">
                             <option value="toUnit">原单位 → 目标单位</option>
                             <option value="fromUnit">目标单位 → 原单位</option>
                         </select>
@@ -182,24 +251,46 @@
                 </div>
             </div>
             
-            <!-- 关键字输入 -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">转换关键字（多个用逗号分隔）</label>
-                <input 
-                    type="text" 
-                    id="keyword-input" 
-                    class="block w-full pl-3 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-lg"
-                    placeholder="例如：利润分析,研发投入（留空则处理全部内容）"
-                >
-                <p class="mt-1 text-xs text-gray-500">提示：输入关键字后，只保留关键字及对应的转换数字</p>
+            <!-- 关键字输入和备注 - 移除了分隔线 -->
+            <div class="pt-2 mt-1">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div class="setting-item">
+                        <label class="block text-sm font-medium text-gray-700 setting-label">
+                            <i class="fa fa-tags setting-icon"></i>
+                            转换关键字
+                        </label>
+                        <input 
+                            type="text" 
+                            id="keyword-input" 
+                            class="block w-full pl-3 py-2.5 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-lg transition-all"
+                            placeholder="例如：利润分析,研发投入（留空则处理全部内容）"
+                        >
+                    </div>
+                    
+                    <!-- 备注输入框 -->
+                    <div class="setting-item">
+                        <label class="block text-sm font-medium text-gray-700 setting-label">
+                            <i class="fa fa-sticky-note setting-icon"></i>
+                            备注信息
+                        </label>
+                        <input 
+                            type="text" 
+                            id="note-input" 
+                            class="block w-full pl-3 py-2.5 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-lg transition-all"
+                            placeholder="请输入备注信息，方便后续识别..."
+                        >
+                        <p class="mt-1 text-xs text-gray-500">
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
 
         <!-- 输入输出区域 -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <!-- 输入区域 -->
-            <div class="bg-white shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl">
-                <div class="bg-blue-600 px-6 py-4">
+            <!-- 输入区域 - 增加了圆角 -->
+            <div class="bg-white shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl rounded-xl">
+                <div class="bg-blue-600 px-6 py-4 rounded-t-xl">
                     <h3 class="text-white font-semibold flex items-center">
                         <i class="fa fa-pencil mr-2"></i>输入文本
                     </h3>
@@ -224,26 +315,26 @@
                         <button id="sample-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg font-medium transition transition-all flex items-center">
                             <i class="fa fa-file-text-o mr-2"></i>示例文本
                         </button>
-                        <button id="clear-format-btn" class="bg-green-100 hover:bg-green-200 text-green-800 px-4 py-2 rounded-lg font-medium transition-all flex items-center">
-                            <i class="fa fa-eraser mr-2"></i>清除格式
-                        </button>
-                        <button id="remove-units-btn" class="bg-green-100 hover:bg-green-200 text-green-800 px-4 py-2 rounded-lg font-medium transition-all flex items-center">
-                            <i class="fa fa-cut mr-2"></i>移除单位
-                        </button>
                     </div>
                 </div>
             </div>
 
-            <!-- 输出区域 -->
-            <div class="bg-white shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl">
-                <div class="bg-green-600 px-6 py-4 flex justify-between items-center">
+            <!-- 输出区域 - 增加了圆角 -->
+            <div class="bg-white shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl rounded-xl">
+                <div class="bg-green-600 px-6 py-4 flex justify-between items-center rounded-t-xl">
                     <h3 class="text-white font-semibold flex items-center">
                         <i class="fa fa-edit mr-2"></i>转换结果
                     </h3>
-                    <button id="view-mode-btn" class="text-white text-sm flex items-center bg-green-700 hover:bg-green-800 px-3 py-1 rounded transition-colors">
-                        <i class="fa fa-eye mr-1"></i>
-                        <span id="view-mode-text">切换对比模式</span>
-                    </button>
+                    <div class="flex space-x-2">
+                        <!-- 明显的保存按钮 -->
+                        <button id="save-result-btn" class="text-white text-sm flex items-center px-4 py-2 rounded-lg font-medium transition-all save-button" disabled>
+                            <i class="fa fa-save mr-2"></i>保存记录
+                        </button>
+                        <button id="view-mode-btn" class="text-white text-sm flex items-center bg-green-700 hover:bg-green-800 px-3 py-2 rounded-lg transition-colors">
+                            <i class="fa fa-eye mr-1"></i>
+                            <span id="view-mode-text">对比模式</span>
+                        </button>
+                    </div>
                 </div>
                 <div class="p-6">
                     <!-- 普通视图 -->
@@ -296,15 +387,69 @@
             </div>
         </div>
 
-        <!-- 提取的数字列表 -->
+        <!-- 提取的数字列表和统计信息 -->
         <div id="extracted-numbers-container" class="mt-8 bg-white rounded-xl shadow-lg p-6 hidden">
-            <h3 class="text-lg font-semibold mb-4 text-gray-800 flex items-center">
-                <i class="fa fa-list-ol text-orange-500 mr-2"></i>提取的数字结果
-            </h3>
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                    <i class="fa fa-list-ol text-orange-500 mr-2"></i>提取的数字结果
+                </h3>
+                <!-- 数字统计摘要 -->
+                <div class="flex space-x-4 bg-gray-50 px-4 py-2 rounded-lg">
+                    <div class="text-sm">
+                        <span class="text-gray-500">总数：</span>
+                        <span class="font-medium text-gray-800" id="numbers-count">0</span>
+                    </div>
+                    <div class="text-sm">
+                        <span class="text-gray-500">总和：</span>
+                        <span class="font-medium text-blue-600" id="numbers-sum">0</span>
+                    </div>
+                    <div class="text-sm">
+                        <span class="text-gray-500">单位：</span>
+                        <span class="font-medium text-green-600" id="numbers-unit">元</span>
+                    </div>
+                </div>
+            </div>
             <div class="p-4 border border-gray-200 rounded-lg bg-gray-50 max-h-40 overflow-auto">
                 <ul id="extracted-numbers-list" class="space-y-1 text-gray-700">
                     <!-- 提取的数字将在这里显示 -->
                 </ul>
+            </div>
+        </div>
+
+        <!-- 历史记录弹窗 -->
+        <div id="history-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[80vh] overflow-hidden flex flex-col">
+                <div class="bg-blue-600 px-6 py-4 flex justify-between items-center">
+                    <h3 class="text-white font-semibold flex items-center">
+                        <i class="fa fa-history mr-2"></i>转换历史记录
+                    </h3>
+                    <div class="flex space-x-3">
+                        <button id="clear-history-btn" class="text-white text-sm flex items-center bg-blue-700 hover:bg-blue-800 px-3 py-1 rounded transition-colors">
+                            <i class="fa fa-trash mr-1"></i>清空记录
+                        </button>
+                        <button id="close-history-btn" class="text-white hover:text-gray-200 transition-colors">
+                            <i class="fa fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="p-6 overflow-y-auto flex-grow">
+                    <div id="history-list" class="space-y-3">
+                        <!-- 历史记录将在这里动态生成 -->
+                        <div class="text-center text-gray-500 py-8">
+                            <i class="fa fa-folder-open text-4xl mb-2 opacity-30"></i>
+                            <p>暂无保存的转换记录</p>
+                            <p class="text-xs mt-1">转换并保存结果后将显示在这里</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-6 py-3 border-t flex justify-between">
+                    <div class="text-sm text-gray-500">
+                        <i class="fa fa-info-circle mr-1"></i> 记录保存在本地，清除浏览器数据会丢失
+                    </div>
+                    <button id="import-export-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-all flex items-center text-sm">
+                        <i class="fa fa-download mr-2"></i>导出记录
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -329,7 +474,7 @@
                     </div>
                 </div>
                 <div class="bg-gray-50 px-6 py-3 border-t flex justify-end">
-                    <button id="copy-stats-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium transition-all flex items-center text-sm">
+                    <button id="copy-stats-btn" class="bg-indigo-600 hover:indigo-600 text-white px-4 py-2 rounded-lg font-medium transition-all flex items-center text-sm">
                         <i class="fa fa-copy mr-2"></i>复制统计结果
                     </button>
                 </div>
@@ -357,6 +502,7 @@
         let currentInput = '';
         let extractedNumbersWithoutUnits = [];
         let convertedNumbers = []; // 存储转换后的数字（数值类型）
+        let savedResults = []; // 保存的结果记录
         
         // DOM元素
         const inputText = document.getElementById('input-text');
@@ -378,8 +524,6 @@
         const unitSelect = document.getElementById('unit-select');
         const decimalSelect = document.getElementById('decimal-select');
         const directionSelect = document.getElementById('direction-select');
-        const clearFormatBtn = document.getElementById('clear-format-btn');
-        const removeUnitsBtn = document.getElementById('remove-units-btn');
         const viewModeBtn = document.getElementById('view-mode-btn');
         const viewModeText = document.getElementById('view-mode-text');
         const normalView = document.getElementById('normal-view');
@@ -388,9 +532,22 @@
         const convertedCompare = document.getElementById('converted-compare');
         const originalCount = document.getElementById('original-count');
         const convertedCount = document.getElementById('converted-count');
-        const keywordInput = document.getElementById('keyword-input'); // 关键字输入框
+        const keywordInput = document.getElementById('keyword-input');
+        const noteInput = document.getElementById('note-input'); // 备注输入框
+        const saveResultBtn = document.getElementById('save-result-btn'); // 保存结果按钮
+        const historyBtn = document.getElementById('history-btn');
+        const mobileHistoryBtn = document.getElementById('mobile-history-btn');
+        const historyModal = document.getElementById('history-modal');
+        const closeHistoryBtn = document.getElementById('close-history-btn');
+        const clearHistoryBtn = document.getElementById('clear-history-btn');
+        const historyList = document.getElementById('history-list');
+        const importExportBtn = document.getElementById('import-export-btn');
         const mobileMenuBtn = document.getElementById('mobile-menu-btn');
         const mobileMenu = document.getElementById('mobile-menu');
+        // 数字统计摘要元素
+        const numbersCount = document.getElementById('numbers-count');
+        const numbersSum = document.getElementById('numbers-sum');
+        const numbersUnit = document.getElementById('numbers-unit');
 
         // 示例文本
         const sampleText = `财务数据示例：
@@ -416,6 +573,9 @@
 
         // 初始化事件监听
         function init() {
+            // 从本地存储加载保存的记录
+            loadSavedResults();
+            
             // 实时更新输入统计
             inputText.addEventListener('input', () => {
                 inputStats.textContent = `${inputText.value.length}个字`;
@@ -429,14 +589,17 @@
                 inputText.value = '';
                 outputContainer.value = '';
                 keywordInput.value = '';
+                noteInput.value = '';
                 inputStats.textContent = '0个字';
                 extractedNumbersContainer.classList.add('hidden');
-                [copyAllBtn, copyNumbersBtn, exportTxtBtn, statsBtn].forEach(btn => btn.disabled = true);
+                [copyAllBtn, copyNumbersBtn, exportTxtBtn, statsBtn, saveResultBtn].forEach(btn => btn.disabled = true);
                 conversionHistory = [];
                 historyIndex = -1;
                 currentInput = '';
                 extractedNumbersWithoutUnits = [];
                 convertedNumbers = [];
+                // 更新统计摘要
+                updateNumbersSummary();
             });
 
             // 示例文本
@@ -495,35 +658,15 @@
                 document.body.removeChild(textArea);
             }
 
-            // 清除格式
-            clearFormatBtn.addEventListener('click', () => {
-                inputText.value = inputText.value
-                    .replace(/\s+/g, ' ')
-                    .replace(/ +/g, ' ')
-                    .trim();
-                showNotification('格式已清除');
-            });
-
-            // 移除单位
-            removeUnitsBtn.addEventListener('click', () => {
-                const units = ['元', '万', '千万', '亿', '美元', '欧元'];
-                let text = inputText.value;
-                units.forEach(unit => {
-                    text = text.replace(new RegExp(unit, 'g'), '');
-                });
-                inputText.value = text;
-                showNotification('已移除常见单位');
-            });
-
             // 切换视图模式
             viewModeBtn.addEventListener('click', () => {
                 normalView.classList.toggle('hidden');
                 compareView.classList.toggle('hidden');
                 
                 if (compareView.classList.contains('hidden')) {
-                    viewModeText.textContent = '切换对比模式';
+                    viewModeText.textContent = '对比模式';
                 } else {
-                    viewModeText.textContent = '切换普通模式';
+                    viewModeText.textContent = '普通模式';
                     // 更新对比视图内容
                     if (currentInput) {
                         updateCompareView(currentInput, outputContainer.value);
@@ -537,7 +680,7 @@
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = '数字转换结果.txt';
+                a.download = `${noteInput.value || '数字转换结果'}.txt`;
                 a.click();
                 URL.revokeObjectURL(url);
                 showNotification('已导出为TXT文件');
@@ -602,10 +745,11 @@
                 if (e.ctrlKey && e.key === 'z' && historyIndex > 0) {
                     e.preventDefault();
                     historyIndex--;
-                    const { input, output, keyword } = conversionHistory[historyIndex];
+                    const { input, output, keyword, note } = conversionHistory[historyIndex];
                     inputText.value = input;
                     outputContainer.value = output;
                     keywordInput.value = keyword;
+                    noteInput.value = note;
                     extractNumbersFromText(output);
                     updateCompareView(input, output);
                     showNotification('已撤销');
@@ -614,15 +758,51 @@
                 if (e.ctrlKey && e.key === 'y' && historyIndex < conversionHistory.length - 1) {
                     e.preventDefault();
                     historyIndex++;
-                    const { input, output, keyword } = conversionHistory[historyIndex];
+                    const { input, output, keyword, note } = conversionHistory[historyIndex];
                     inputText.value = input;
                     outputContainer.value = output;
                     keywordInput.value = keyword;
+                    noteInput.value = note;
                     extractNumbersFromText(output);
                     updateCompareView(input, output);
                     showNotification('已重做');
                 }
             });
+
+            // 保存结果按钮 - 明显的按钮
+            saveResultBtn.addEventListener('click', saveCurrentResult);
+            
+            // 历史记录按钮
+            historyBtn.addEventListener('click', showHistoryModal);
+            mobileHistoryBtn.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+                showHistoryModal();
+            });
+            
+            // 关闭历史记录弹窗
+            closeHistoryBtn.addEventListener('click', () => {
+                historyModal.classList.add('hidden');
+            });
+            
+            // 点击弹窗外部关闭
+            historyModal.addEventListener('click', (e) => {
+                if (e.target === historyModal) {
+                    historyModal.classList.add('hidden');
+                }
+            });
+            
+            // 清空历史记录
+            clearHistoryBtn.addEventListener('click', () => {
+                if (confirm('确定要清空所有历史记录吗？此操作不可恢复。')) {
+                    localStorage.removeItem('conversionResults');
+                    savedResults = [];
+                    renderHistoryList();
+                    showNotification('所有历史记录已清空');
+                }
+            });
+            
+            // 导出记录
+            importExportBtn.addEventListener('click', exportHistory);
         }
 
         // 计算文本字数
@@ -640,14 +820,15 @@
             
             currentInput = text;
             const keywordStr = keywordInput.value.trim();
+            const noteStr = noteInput.value.trim();
             const unitValue = unitSelect.value;
             const unitName = unitMap[unitValue];
             const unit = parseInt(unitValue);
             const decimals = parseInt(decimalSelect.value);
             const direction = directionSelect.value;
             
-            // 保存历史记录（包含关键字）
-            saveToHistory(text, outputContainer.value, keywordStr);
+            // 保存历史记录（包含关键字和备注）
+            saveToHistory(text, outputContainer.value, keywordStr, noteStr);
             
             // 执行转换
             let convertedText = "";
@@ -664,7 +845,6 @@
                     
                     keywords.forEach(keyword => {
                         // 构建匹配关键字及后续数字的正则表达式
-                        // 匹配关键字，然后捕获所有后续的数字（包括可能的描述）
                         const regex = new RegExp(`(${keyword}[^\\d]*)(-?\\d+(?:[ ,]\\d{3})*(?:\\.\\d+)?)`, 'gi');
                         let match;
                         
@@ -719,19 +899,20 @@
             extractNumbersFromText(convertedText);
             updateExtractedNumbers(extractedNumbersWithoutUnits);
             updateCompareView(text, convertedText);
+            updateNumbersSummary(); // 更新数字统计摘要
             
             // 启用按钮
-            [copyAllBtn, copyNumbersBtn, exportTxtBtn, statsBtn].forEach(btn => btn.disabled = false);
+            [copyAllBtn, copyNumbersBtn, exportTxtBtn, statsBtn, saveResultBtn].forEach(btn => btn.disabled = false);
             extractedNumbersContainer.classList.remove('hidden');
             
             showNotification('转换完成');
         }
 
-        // 转换所有数字的辅助函数（优化数字格式处理）
+        // 转换所有数字的辅助函数
         function convertAllNumbers(text, unit, decimals, direction, unitName) {
             // 匹配数字，包括带空格和逗号的情况
             return text.replace(/-?\d+(?:[ ,]\d{3})*(?:\.\d+)?/g, (match) => {
-                // 清除数字中的空格和逗号，但不影响整体文本格式
+                // 清除数字中的空格和逗号
                 const cleanNumStr = match.replace(/[ ,]/g, '');
                 const cleanNum = parseFloat(cleanNumStr);
                 
@@ -770,6 +951,7 @@
                 .filter(num => !isNaN(num));
             
             updateExtractedNumbers(extractedNumbersWithoutUnits);
+            updateNumbersSummary(); // 更新统计摘要
             return extractedNumbersWithoutUnits;
         }
 
@@ -783,6 +965,18 @@
             extractedNumbersList.innerHTML = numbers.map((num, i) => 
                 `<li class="flex items-center"><span class="inline-block w-6 text-gray-400 mr-2">${i+1}.</span> <span class="text-orange-600">${num}</span></li>`
             ).join('');
+        }
+
+        // 更新数字统计摘要
+        function updateNumbersSummary() {
+            const count = convertedNumbers.length;
+            const sum = convertedNumbers.reduce((acc, num) => acc + num, 0);
+            const unitName = unitMap[unitSelect.value];
+            const decimals = parseInt(decimalSelect.value);
+            
+            numbersCount.textContent = count;
+            numbersSum.textContent = sum.toFixed(decimals);
+            numbersUnit.textContent = unitName;
         }
 
         // 更新对比视图（高亮关键字和转换的数字）
@@ -923,12 +1117,18 @@
             }, 100);
         }
 
-        // 保存历史记录（包含关键字）
-        function saveToHistory(input, output, keyword) {
+        // 保存历史记录（包含关键字和备注）
+        function saveToHistory(input, output, keyword, note) {
             // 如果历史记录超过当前索引，截断历史记录
             conversionHistory = conversionHistory.slice(0, historyIndex + 1);
-            // 添加新记录（包含关键字）
-            conversionHistory.push({ input, output, keyword });
+            // 添加新记录（包含关键字和备注）
+            conversionHistory.push({ 
+                input, 
+                output, 
+                keyword, 
+                note,
+                timestamp: new Date().getTime()
+            });
             // 更新当前索引
             historyIndex = conversionHistory.length - 1;
             // 限制历史记录数量为20条
@@ -936,6 +1136,330 @@
                 conversionHistory.shift();
                 historyIndex--;
             }
+        }
+
+        // 保存当前结果到本地存储（包含数字总数和总和）
+        function saveCurrentResult() {
+            const note = noteInput.value.trim() || `未命名记录 (${formatDate(new Date())})`;
+            
+            // 计算统计数据
+            const count = convertedNumbers.length;
+            const sum = convertedNumbers.reduce((acc, num) => acc + num, 0);
+            const decimals = parseInt(decimalSelect.value);
+            
+            // 提取关键字和对应数字的组合结果
+            let keywordResults = [];
+            const keywordStr = keywordInput.value.trim();
+            if (keywordStr) {
+                const keywords = keywordStr.split(/[,，]/).map(k => k.trim()).filter(k => k);
+                const text = inputText.value;
+                
+                keywords.forEach(keyword => {
+                    const regex = new RegExp(`(${keyword}[^\\d]*)(-?\\d+(?:[ ,]\\d{3})*(?:\\.\\d+)?)`, 'gi');
+                    let match;
+                    
+                    while ((match = regex.exec(text)) !== null) {
+                        keywordResults.push({
+                            keyword: match[1],
+                            originalNumber: match[2],
+                            convertedNumber: outputContainer.value.includes(match[1]) ? 
+                                outputContainer.value.split(match[1])[1].split('\n')[0] : ''
+                        });
+                    }
+                });
+            }
+            
+            const result = {
+                id: Date.now(),
+                note: note,
+                input: inputText.value,
+                output: outputContainer.value,
+                numbers: extractedNumbersWithoutUnits,
+                // 新增关键字和数字组合结果
+                keywordResults: keywordResults,
+                // 新增统计信息
+                stats: {
+                    count: count,          // 数字总数
+                    sum: sum.toFixed(decimals),  // 数字总和
+                    min: count > 0 ? Math.min(...convertedNumbers).toFixed(decimals) : '0',
+                    max: count > 0 ? Math.max(...convertedNumbers).toFixed(decimals) : '0'
+                },
+                unit: unitSelect.value,
+                unitName: unitMap[unitSelect.value],
+                decimals: decimalSelect.value,
+                direction: directionSelect.value,
+                keyword: keywordInput.value.trim(),
+                timestamp: new Date().getTime()
+            };
+            
+            // 添加到保存的结果列表
+            savedResults.unshift(result); // 最新的放在前面
+            
+            // 限制保存的记录数量为50条
+            if (savedResults.length > 50) {
+                savedResults.pop();
+            }
+            
+            // 保存到本地存储
+            localStorage.setItem('conversionResults', JSON.stringify(savedResults));
+            
+            // 更新历史记录列表
+            renderHistoryList();
+            
+            showNotification(`已保存记录：${note}`);
+        }
+
+        // 从本地存储加载保存的结果
+        function loadSavedResults() {
+            const saved = localStorage.getItem('conversionResults');
+            if (saved) {
+                try {
+                    savedResults = JSON.parse(saved);
+                    renderHistoryList();
+                } catch (e) {
+                    console.error('加载保存的结果失败', e);
+                    savedResults = [];
+                }
+            }
+        }
+
+        // 渲染历史记录列表（显示数字总数和总和）
+        function renderHistoryList() {
+            if (savedResults.length === 0) {
+                historyList.innerHTML = `
+                    <div class="text-center text-gray-500 py-8">
+                        <i class="fa fa-folder-open text-4xl mb-2 opacity-30"></i>
+                        <p>暂无保存的转换记录</p>
+                        <p class="text-xs mt-1">转换并保存结果后将显示在这里</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            historyList.innerHTML = savedResults.map((item, index) => {
+                // 构建关键字和数字组合的HTML
+                let keywordResultsHtml = '';
+                if (item.keywordResults && item.keywordResults.length > 0) {
+                    keywordResultsHtml = `
+                        <div class="mt-2 bg-gray-50 p-2 rounded text-xs">
+                            <p class="font-medium text-gray-700 mb-1">关键字与结果：</p>
+                            <ul class="space-y-1">
+                                ${item.keywordResults.map((kr, idx) => `
+                                    <li class="flex flex-wrap">
+                                        <span class="text-blue-600 font-medium">${kr.keyword}</span>
+                                        <span class="mx-1 text-gray-500">→</span>
+                                        <span class="text-green-600">${kr.convertedNumber}</span>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                    `;
+                } else if (item.keyword) {
+                    keywordResultsHtml = `
+                        <div class="mt-2 text-xs text-gray-500">
+                            <p>关键字：${item.keyword}（未找到匹配的数字）</p>
+                        </div>
+                    `;
+                }
+                
+                return `
+                <div class="history-item p-4 border border-gray-200 rounded-lg hover:shadow-md cursor-pointer" data-id="${item.id}">
+                    <div class="flex justify-between items-start mb-2">
+                        <h4 class="font-medium text-gray-800">${item.note}</h4>
+                        <span class="text-xs text-gray-500">${formatDate(new Date(item.timestamp))}</span>
+                    </div>
+                    <div class="text-sm text-gray-600 mb-2">
+                        <span class="inline-block bg-gray-100 px-2 py-0.5 rounded text-xs mr-2">
+                            ${item.direction === 'toUnit' ? '原→目' : '目→原'}
+                        </span>
+                        <span class="inline-block bg-gray-100 px-2 py-0.5 rounded text-xs mr-2">
+                            单位: ${item.unitName}
+                        </span>
+                        <span class="inline-block bg-gray-100 px-2 py-0.5 rounded text-xs">
+                            小数: ${item.decimals}位
+                        </span>
+                    </div>
+                    <!-- 显示统计信息：数字总数和总和 -->
+                    <div class="text-sm text-indigo-600 mb-2">
+                        <i class="fa fa-calculator mr-1"></i>
+                        数字总数: ${item.stats.count} 个 | 总和: ${item.stats.sum}${item.unitName}
+                    </div>
+                    ${keywordResultsHtml}
+                    <div class="mt-3 flex justify-end space-x-2">
+                        <button class="view-history-item text-blue-600 hover:text-blue-800 text-xs" data-id="${item.id}">
+                            <i class="fa fa-eye mr-1"></i>查看
+                        </button>
+                        <button class="copy-history-item text-green-600 hover:text-green-800 text-xs" data-id="${item.id}">
+                            <i class="fa fa-copy mr-1"></i>复制结果
+                        </button>
+                        <button class="delete-history-item text-red-600 hover:text-red-800 text-xs" data-id="${item.id}">
+                            <i class="fa fa-trash mr-1"></i>删除
+                        </button>
+                    </div>
+                </div>
+            `;
+            }).join('');
+            
+            // 为复制按钮添加事件监听（修复按钮无效问题）
+            document.querySelectorAll('.copy-history-item').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const id = parseInt(e.currentTarget.getAttribute('data-id'));
+                    copyHistoryItem(id);
+                });
+            });
+            
+            // 为查看按钮添加事件监听
+            document.querySelectorAll('.view-history-item').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const id = parseInt(e.currentTarget.getAttribute('data-id'));
+                    viewHistoryItem(id);
+                });
+            });
+            
+            // 为删除按钮添加事件监听
+            document.querySelectorAll('.delete-history-item').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const id = parseInt(e.currentTarget.getAttribute('data-id'));
+                    deleteHistoryItem(id);
+                });
+            });
+            
+            // 点击整个记录项也可以查看
+            document.querySelectorAll('.history-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const id = parseInt(item.getAttribute('data-id'));
+                    viewHistoryItem(id);
+                });
+            });
+        }
+
+        // 查看历史记录项
+        function viewHistoryItem(id) {
+            const item = savedResults.find(r => r.id === id);
+            if (!item) return;
+            
+            // 填充数据到表单
+            inputText.value = item.input;
+            outputContainer.value = item.output;
+            keywordInput.value = item.keyword;
+            noteInput.value = item.note;
+            unitSelect.value = item.unit;
+            decimalSelect.value = item.decimals;
+            directionSelect.value = item.direction;
+            
+            // 更新统计
+            inputStats.textContent = `${item.input.length}个字`;
+            
+            // 提取数字
+            extractNumbersFromText(item.output);
+            extractedNumbersContainer.classList.remove('hidden');
+            
+            // 启用按钮
+            [copyAllBtn, copyNumbersBtn, exportTxtBtn, statsBtn, saveResultBtn].forEach(btn => btn.disabled = false);
+            
+            // 更新当前输入
+            currentInput = item.input;
+            
+            // 如果在对比模式，更新对比视图
+            if (!compareView.classList.contains('hidden')) {
+                updateCompareView(item.input, item.output);
+            }
+            
+            // 关闭历史记录弹窗
+            historyModal.classList.add('hidden');
+            
+            showNotification(`已加载记录：${item.note}`);
+        }
+
+        // 复制历史记录项结果 - 修复此功能，包含备注
+        function copyHistoryItem(id) {
+            const item = savedResults.find(r => r.id === id);
+            if (!item) {
+                showNotification('未找到该记录', false);
+                return;
+            }
+            
+            // 同时包含备注和转换结果
+            const contentToCopy = `【${item.note}】\n\n${item.output}`;
+            
+            navigator.clipboard.writeText(contentToCopy)
+                .then(() => showNotification(`已复制记录 "${item.note}" 的结果和备注`))
+                .catch(() => {
+                    // 降级方案
+                    const textArea = document.createElement("textarea");
+                    textArea.value = contentToCopy;
+                    textArea.style.position = "fixed";
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+                    
+                    try {
+                        document.execCommand('copy');
+                        showNotification(`已复制记录 "${item.note}" 的结果和备注`);
+                    } catch (err) {
+                        showNotification('复制失败，请手动复制', false);
+                    }
+                    
+                    document.body.removeChild(textArea);
+                });
+        }
+
+        // 删除历史记录项
+        function deleteHistoryItem(id) {
+            const item = savedResults.find(r => r.id === id);
+            if (!item) return;
+            
+            if (confirm(`确定要删除记录 "${item.note}" 吗？`)) {
+                savedResults = savedResults.filter(r => r.id !== id);
+                localStorage.setItem('conversionResults', JSON.stringify(savedResults));
+                renderHistoryList();
+                showNotification(`已删除记录：${item.note}`);
+            }
+        }
+
+        // 显示历史记录弹窗
+        function showHistoryModal() {
+            renderHistoryList();
+            historyModal.classList.remove('hidden');
+        }
+
+        // 导出历史记录
+        function exportHistory() {
+            if (savedResults.length === 0) {
+                showNotification('没有可导出的记录', false);
+                return;
+            }
+            
+            // 准备导出数据
+            const exportData = {
+                app: "数字单位转换器",
+                version: "1.0",
+                exportDate: new Date().getTime(),
+                records: savedResults
+            };
+            
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `数字转换记录_${formatDateForFile(new Date())}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            showNotification(`已导出 ${savedResults.length} 条记录`);
+        }
+
+        // 格式化日期
+        function formatDate(date) {
+            return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+        }
+
+        // 格式化文件名中的日期
+        function formatDateForFile(date) {
+            return `${date.getFullYear()}${(date.getMonth() + 1).toString().padStart(2, '0')}${date.getDate().toString().padStart(2, '0')}_${date.getHours().toString().padStart(2, '0')}${date.getMinutes().toString().padStart(2, '0')}`;
         }
 
         // 显示通知
@@ -977,4 +1501,3 @@
     </script>
 </body>
 </html>
-    
