@@ -9,6 +9,29 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#6366f1',
+                        accent: '#10b981',
+                        neutral: '#f3f4f6',
+                        dark: '#1e293b'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'card': '0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.03)',
+                        'card-hover': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                    }
+                },
+            }
+        }
+    </script>
+    
     <style type="text/tailwindcss">
         @layer utilities {
             .content-auto {
@@ -116,11 +139,11 @@
                 background-color: #f5f5f7;
             }
             .save-button {
-                background: linear-gradient(135deg, #4338ca 0%, #6366f1 100%) !important;
+                background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%) !important;
                 box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3) !important;
             }
             .save-button:hover {
-                background: linear-gradient(135deg, #3730a3 0%, #4f46e5 100%) !important;
+                background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%) !important;
                 box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4) !important;
                 transform: translateY(-1px) !important;
             }
@@ -144,22 +167,6 @@
                 color: #6366f1;
                 font-size: 1rem;
                 width: 1.25rem;
-            }
-            
-            /* 数字格式问题提示样式 */
-            .format-issue {
-                background-color: #fff3cd;
-                border-left: 4px solid #ffc107;
-                padding: 0.5rem 1rem;
-                margin: 1rem 0;
-                border-radius: 4px;
-                display: flex;
-                align-items: center;
-            }
-            .format-issue i {
-                color: #fd7e14;
-                margin-right: 0.5rem;
-                font-size: 1.2rem;
             }
             
             /* 深色模式样式 */
@@ -242,19 +249,98 @@
                 color: #93c5fd;
             }
             
-            .dark-mode .format-issue {
-                background-color: #342600;
-                border-left-color: #d4a72c;
+            /* 动画效果 */
+            .fade-in {
+                animation: fadeIn 0.3s ease-in-out;
+            }
+            
+            @keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+            
+            .slide-in {
+                animation: slideIn 0.3s ease-out;
+            }
+            
+            @keyframes slideIn {
+                from { transform: translateY(20px); opacity: 0; }
+                to { transform: translateY(0); opacity: 1; }
+            }
+            
+            /* 开关样式 */
+            .toggle-switch {
+                position: relative;
+                display: inline-block;
+                width: 50px;
+                height: 24px;
+            }
+            
+            .toggle-switch input {
+                opacity: 0;
+                width: 0;
+                height: 0;
+            }
+            
+            .toggle-slider {
+                position: absolute;
+                cursor: pointer;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: #ccc;
+                transition: .4s;
+                border-radius: 24px;
+            }
+            
+            .toggle-slider:before {
+                position: absolute;
+                content: "";
+                height: 16px;
+                width: 16px;
+                left: 4px;
+                bottom: 4px;
+                background-color: white;
+                transition: .4s;
+                border-radius: 50%;
+            }
+            
+            input:checked + .toggle-slider {
+                background-color: #3b82f6;
+            }
+            
+            input:checked + .toggle-slider:before {
+                transform: translateX(26px);
+            }
+
+            /* 头部开关容器样式 */
+            .header-toggles {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 1.5rem;
+                align-items: center;
+            }
+            
+            .toggle-item {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+            
+            .toggle-label {
+                font-size: 0.9rem;
+                color: rgba(255, 255, 255, 0.9);
             }
         }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen transition-colors duration-300">
+<body class="bg-gray-50 min-h-screen transition-colors duration-300 font-sans">
     <!-- 顶部导航 -->
     <header class="bg-white shadow-md fixed w-full top-0 z-50 transition-all duration-300">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center space-x-2">
-                <i class="fa fa-calculator text-blue-600 text-2xl"></i>
+                <i class="fa fa-calculator text-primary text-2xl"></i>
                 <h1 class="text-xl md:text:text-2xl font-bold text-gray-800">批量数字单位转换工具</h1>
             </div>
             <div class="hidden md:flex items-center space-x-4">
@@ -292,9 +378,9 @@
     <!-- 主内容区 -->
     <main class="container mx-auto px-4 pt-24 pb-16">
         <!-- 转换设置区 -->
-        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+        <div class="bg-white rounded-xl shadow-card p-6 mb-8 fade-in transform hover:shadow-card-hover transition-all duration-300">
             <h2 class="text-lg font-semibold mb-4 text-gray-800 flex items-center">
-                <i class="fa fa-sliders text-blue-600 mr-2"></i>转换设置
+                <i class="fa fa-sliders text-primary mr-2"></i>转换设置
             </h2>
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
@@ -305,10 +391,10 @@
                         转换单位
                     </label>
                     <div class="custom-select">
-                        <select id="unit-select" class="block w-full pl-3 py-2.5 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-lg">
+                        <select id="unit-select" class="block w-full pl-3 py-2.5 text-base border-gray-300 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-lg">
                             <option value="10000">万 (÷10000)</option>
                             <option value="1000">千 (÷1000)</option>
-                            <option value="1">元 (÷1)</option>                          
+                            <option value="1">元 (÷1)</option>
                         </select>
                     </div>
                 </div>
@@ -320,13 +406,11 @@
                         小数位数
                     </label>
                     <div class="custom-select">
-                        <select id="decimal-select" class="block w-full pl-3 py-2.5 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-lg">
+                        <select id="decimal-select" class="block w-full pl-3 py-2.5 text-base border-gray-300 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-lg">
                             <option value="0">0位</option>
                             <option value="1">1位</option>
                             <option value="2" selected>2位</option>
                             <option value="3">3位</option>
-                            <option value="4">4位</option>
-                            <option value="5">5位</option>
                         </select>
                     </div>
                 </div>
@@ -338,7 +422,7 @@
                         转换方向
                     </label>
                     <div class="custom-select">
-                        <select id="direction-select" class="block w-full pl-3 py-2.5 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-lg">
+                        <select id="direction-select" class="block w-full pl-3 py-2.5 text-base border-gray-300 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-lg">
                             <option value="toUnit">原单位 → 目标单位</option>
                             <option value="fromUnit">目标单位 → 原单位</option>
                         </select>
@@ -357,7 +441,7 @@
                         <input 
                             type="text" 
                             id="keyword-input" 
-                            class="block w-full pl-3 py-2.5 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-lg transition-all"
+                            class="block w-full pl-3 py-2.5 text-base border-gray-300 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-lg transition-all"
                             placeholder="例如：利润分析,研发投入（留空则处理全部内容）"
                         >
                     </div>
@@ -371,7 +455,7 @@
                         <input 
                             type="text" 
                             id="note-input" 
-                            class="block w-full pl-3 py-2.5 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-lg transition-all"
+                            class="block w-full pl-3 py-2.5 text-base border-gray-300 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-lg transition-all"
                             placeholder="请输入备注信息，方便后续识别..."
                         >
                     </div>
@@ -382,30 +466,40 @@
         <!-- 输入输出区域 -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <!-- 输入区域 -->
-            <div class="bg-white shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl rounded-xl">
-                <div class="bg-blue-600 px-6 py-4 rounded-t-xl">
+            <div class="bg-white shadow-card overflow-hidden transform transition-all duration-300 hover:shadow-card-hover rounded-xl slide-in">
+                <div class="bg-primary px-6 py-4 rounded-t-xl flex justify-between items-center">
                     <h3 class="text-white font-semibold flex items-center">
                         <i class="fa fa-pencil mr-2"></i>输入文本
                     </h3>
+                    <!-- 头部开关组 -->
+                    <div class="header-toggles">
+                        <div class="toggle-item">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="remove-unit-toggle">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span class="toggle-label">去除转换后单位</span>
+                        </div>
+                    </div>
                 </div>
                 <div class="p-6">
                     <div class="relative">
                         <textarea 
                             id="input-text" 
-                            class="w-full h-64 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"
+                            class="w-full h-64 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all resize-none"
                             placeholder="请在此输入包含数字的文本..."></textarea>
                         <div class="absolute right-3 top-3 text-xs px-2 py-1 bg-gray-100 rounded-md text-gray-600" id="input-stats">
                             0个字
                         </div>
                     </div>
                     <div class="mt-4 flex flex-wrap gap-3">
-                        <button id="convert-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-all flex items-center shadow-md hover:shadow-lg">
+                        <button id="convert-btn" class="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-lg font-medium transition-all flex items-center shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
                             <i class="fa fa-exchange mr-2"></i>转换数字
                         </button>
-                        <button id="clear-input-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg font-medium transition-all flex items-center">
+                        <button id="clear-input-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg font-medium transition-all flex items-center transform hover:-translate-y-0.5">
                             <i class="fa fa-trash mr-2"></i>清空输入
                         </button>
-                        <button id="sample-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg font-medium transition transition-all flex items-center">
+                        <button id="sample-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg font-medium transition-all flex items-center transform hover:-translate-y-0.5">
                             <i class="fa fa-file-text-o mr-2"></i>示例文本
                         </button>
                     </div>
@@ -413,8 +507,8 @@
             </div>
 
             <!-- 输出区域 -->
-            <div class="bg-white shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl rounded-xl">
-                <div class="bg-green-600 px-6 py-4 flex justify-between items-center rounded-t-xl">
+            <div class="bg-white shadow-card overflow-hidden transform transition-all duration-300 hover:shadow-card-hover rounded-xl slide-in" style="animation-delay: 0.1s;">
+                <div class="bg-accent px-6 py-4 flex justify-between items-center rounded-t-xl">
                     <h3 class="text-white font-semibold flex items-center">
                         <i class="fa fa-edit mr-2"></i>转换结果
                     </h3>
@@ -423,7 +517,7 @@
                         <button id="save-result-btn" class="text-white text-sm flex items-center px-4 py-2 rounded-lg font-medium transition-all save-button" disabled>
                             <i class="fa fa-save mr-2"></i>保存记录
                         </button>
-                        <button id="view-mode-btn" class="text-white text-sm flex items-center bg-green-700 hover:bg-green-800 px-3 py-2 rounded-lg transition-colors">
+                        <button id="view-mode-btn" class="text-white text-sm flex items-center bg-accent/80 hover:bg-accent/90 px-3 py-2 rounded-lg transition-colors">
                             <i class="fa fa-eye mr-1"></i>
                             <span id="view-mode-text">对比模式</span>
                         </button>
@@ -434,7 +528,7 @@
                     <div id="normal-view">
                         <textarea 
                             id="output-container" 
-                            class="w-full h-64 p-4 border border-gray-300 rounded-lg overflow-auto bg-gray-50 preformatted focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all resize-none"
+                            class="w-full h-64 p-4 border border-gray-300 rounded-lg overflow-auto bg-gray-50 preformatted focus:ring-2 focus:ring-accent focus:border-accent transition-all resize-none"
                             placeholder="转换后的结果将显示在这里，您可以直接编辑..."></textarea>
                     </div>
                     
@@ -463,16 +557,16 @@
                     </div>
                     
                     <div class="mt-4 flex flex-wrap gap-3">
-                        <button id="copy-all-btn" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-all flex items-center shadow-md hover:shadow-lg" disabled>
+                        <button id="copy-all-btn" class="bg-accent hover:bg-accent/90 text-white px-6 py-2 rounded-lg font-medium transition-all flex items-center shadow-md hover:shadow-lg transform hover:-translate-y-0.5" disabled>
                             <i class="fa fa-copy mr-2"></i>复制全部
                         </button>
-                        <button id="copy-numbers-btn" class="bg-orange-500 hover:orange-600 text-white px-4 py-2 rounded-lg font-medium transition-all flex items-center" disabled>
+                        <button id="copy-numbers-btn" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium transition-all flex items-center transform hover:-translate-y-0.5" disabled>
                             <i class="fa fa-hashtag mr-2"></i>只复制数字
                         </button>
-                        <button id="export-txt-btn" class="bg-purple-500 hover:purple-600 text-white px-4 py-2 rounded-lg font-medium transition-all flex items-center" disabled>
+                        <button id="export-txt-btn" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg font-medium transition-all flex items-center transform hover:-translate-y-0.5" disabled>
                             <i class="fa fa-download mr-2"></i>导出TXT
                         </button>
-                        <button id="stats-btn" class="bg-indigo-500 hover:indigo-600 text-white px-4 py-2 rounded-lg font-medium transition-all flex items-center" disabled>
+                        <button id="stats-btn" class="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium transition-all flex items-center transform hover:-translate-y-0.5" disabled>
                             <i class="fa fa-bar-chart mr-2"></i>数字统计
                         </button>
                     </div>
@@ -481,24 +575,28 @@
         </div>
 
         <!-- 提取的数字列表和统计信息 -->
-        <div id="extracted-numbers-container" class="mt-8 bg-white rounded-xl shadow-lg p-6 hidden">
-            <div class="flex justify-between items-center mb-4">
+        <div id="extracted-numbers-container" class="mt-8 bg-white rounded-xl shadow-card p-6 hidden fade-in transform hover:shadow-card-hover transition-all duration-300">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
                 <h3 class="text-lg font-semibold text-gray-800 flex items-center">
                     <i class="fa fa-list-ol text-orange-500 mr-2"></i>提取的数字结果 <span class="text-sm font-normal text-gray-500 ml-2">(已自动排除年份)</span>
                 </h3>
                 <!-- 数字统计摘要 -->
-                <div class="flex space-x-4 bg-gray-50 px-4 py-2 rounded-lg">
+                <div class="flex flex-wrap gap-4 bg-gray-50 px-4 py-2 rounded-lg w-full md:w-auto">
                     <div class="text-sm">
                         <span class="text-gray-500">总数：</span>
                         <span class="font-medium text-gray-800" id="numbers-count">0</span>
                     </div>
                     <div class="text-sm">
                         <span class="text-gray-500">总和：</span>
-                        <span class="font-medium text-blue-600" id="numbers-sum">0</span>
+                        <span class="font-medium text-primary" id="numbers-sum">0</span>
+                    </div>
+                    <div class="text-sm">
+                        <span class="text-gray-500">平均值：</span>
+                        <span class="font-medium text-purple-600" id="numbers-avg">0</span>
                     </div>
                     <div class="text-sm">
                         <span class="text-gray-500">单位：</span>
-                        <span class="font-medium text-green-600" id="numbers-unit">元</span>
+                        <span class="font-medium text-accent" id="numbers-unit">元</span>
                     </div>
                 </div>
             </div>
@@ -510,14 +608,17 @@
         </div>
 
         <!-- 历史记录弹窗 -->
-        <div id="history-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div id="history-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden fade-in">
             <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[80vh] overflow-hidden flex flex-col">
-                <div class="bg-blue-600 px-6 py-4 flex justify-between items-center">
+                <div class="bg-primary px-6 py-4 flex justify-between items-center">
                     <h3 class="text-white font-semibold flex items-center">
                         <i class="fa fa-history mr-2"></i>转换历史记录
                     </h3>
                     <div class="flex space-x-3">
-                        <button id="clear-history-btn" class="text-white text-sm flex items-center bg-blue-700 hover:bg-blue-800 px-3 py-1 rounded transition-colors">
+                        <button id="import-history-btn" class="text-white text-sm flex items-center bg-primary/80 hover:bg-primary/90 px-3 py-1 rounded transition-colors">
+                            <i class="fa fa-upload mr-1"></i>导入记录
+                        </button>
+                        <button id="clear-history-btn" class="text-white text-sm flex items-center bg-primary/80 hover:bg-primary/90 px-3 py-1 rounded transition-colors">
                             <i class="fa fa-trash mr-1"></i>清空记录
                         </button>
                         <button id="close-history-btn" class="text-white hover:text-gray-200 transition-colors">
@@ -526,6 +627,17 @@
                     </div>
                 </div>
                 <div class="p-6 overflow-y-auto flex-grow">
+                    <div class="mb-4 flex items-center justify-between">
+                        <div class="relative">
+                            <input type="text" id="history-search" placeholder="搜索记录..." class="pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                            <i class="fa fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        </div>
+                        <select id="history-filter" class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
+                            <option value="all">所有记录</option>
+                            <option value="keyword">含关键字</option>
+                            <option value="recent">最近30天</option>
+                        </select>
+                    </div>
                     <div id="history-list" class="space-y-3">
                         <!-- 历史记录将在这里动态生成 -->
                         <div class="text-center text-gray-500 py-8">
@@ -539,7 +651,7 @@
                     <div class="text-sm text-gray-500">
                         <i class="fa fa-info-circle mr-1"></i> 记录保存在本地，清除浏览器数据会丢失
                     </div>
-                    <button id="import-export-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-all flex items-center text-sm">
+                    <button id="export-history-btn" class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg font-medium transition-all flex items-center text-sm">
                         <i class="fa fa-download mr-2"></i>导出记录
                     </button>
                 </div>
@@ -547,7 +659,7 @@
         </div>
 
         <!-- 数字统计弹窗 -->
-        <div id="stats-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div id="stats-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden fade-in">
             <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
                 <div class="bg-indigo-600 px-6 py-4 flex justify-between items-center">
                     <h3 class="text-white font-semibold flex items-center">
@@ -567,24 +679,73 @@
                     </div>
                 </div>
                 <div class="bg-gray-50 px-6 py-3 border-t flex justify-end">
-                    <button id="copy-stats-btn" class="bg-indigo-600 hover:indigo-600 text-white px-4 py-2 rounded-lg font-medium transition-all flex items-center text-sm">
+                    <button id="copy-stats-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium transition-all flex items-center text-sm">
                         <i class="fa fa-copy mr-2"></i>复制统计结果
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- 操作提示 -->
-        <div class="mt-6 bg-blue-50 p-3 rounded text-sm text-blue-700">
-            <i class="fa fa-info-circle mr-1"></i> 提示：支持快捷键 <kbd class="px-2 py-1 bg-white border rounded text-xs">Ctrl+Z</kbd> 撤销 和 <kbd class="px-2 py-1 bg-white border rounded text-xs">Ctrl+Y</kbd> 重做 操作，自动识别并保留年份不转换，支持处理中文逗号和带空格的分隔符
-        </div>
-        
-        <!-- 格式问题提示（初始隐藏） -->
-        <div id="format-issue-alert" class="format-issue hidden">
-            <i class="fa fa-exclamation-triangle"></i>
-            <div>
-                <strong>检测到不规范的数字格式：</strong> 已自动处理中文逗号、带空格的分隔符等问题，确保转换准确性。
+        <!-- 帮助弹窗 -->
+        <div id="help-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden fade-in">
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
+                <div class="bg-primary px-6 py-4 flex justify-between items-center">
+                    <h3 class="text-white font-semibold flex items-center">
+                        <i class="fa fa-question-circle mr-2"></i>使用帮助
+                    </h3>
+                    <button id="close-help-btn" class="text-white hover:text-gray-200 transition-colors">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </div>
+                <div class="p-6 overflow-y-auto flex-grow">
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="font-medium text-lg text-gray-800 mb-2">基本功能</h4>
+                            <p class="text-gray-600">本工具用于批量转换数字单位，支持元、千、万之间的转换，并能自动识别年份不进行转换。自动处理各种格式的全角逗号和多个小数点问题。</p>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-medium text-lg text-gray-800 mb-2">使用步骤</h4>
+                            <ol class="list-decimal pl-5 space-y-2 text-gray-600">
+                                <li>在输入框中粘贴或输入包含数字的文本</li>
+                                <li>选择转换单位、小数位数和转换方向</li>
+                                <li>（可选）设置是否去除单位</li>
+                                <li>（可选）输入关键字，只转换包含关键字的数字</li>
+                                <li>点击"转换数字"按钮进行转换</li>
+                                <li>查看转换结果，可复制或导出</li>
+                            </ol>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-medium text-lg text-gray-800 mb-2">特殊功能说明</h4>
+                            <ul class="list-disc pl-5 space-y-2 text-gray-600">
+                                <li><strong>自动格式处理</strong>：自动处理各种全角逗号（，、， 、 ，、，）和多个小数点问题（如1.234.567.89会转为1,234,567.89）</li>
+                                <li><strong>年份识别</strong>：自动识别2000-2100年的年份，以及"年"或"年度"前00-30区间的数字作为年份</li>
+                                <li><strong>单位去除</strong>：可以选择只显示转换后的数字，不显示单位</li>
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-medium text-lg text-gray-800 mb-2">快捷键</h4>
+                            <ul class="space-y-2 text-gray-600">
+                                <li><kbd class="px-2 py-1 bg-gray-100 border rounded text-xs">Ctrl+Z</kbd> - 撤销操作</li>
+                                <li><kbd class="px-2 py-1 bg-gray-100 border rounded text-xs">Ctrl+Y</kbd> - 重做操作</li>
+                                <li><kbd class="px-2 py-1 bg-gray-100 border rounded text-xs">Ctrl+C</kbd> - 复制选中内容</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-6 py-3 border-t flex justify-end">
+                    <button id="close-help-btn-2" class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg font-medium transition-all flex items-center text-sm">
+                        <i class="fa fa-check mr-2"></i>我知道了
+                    </button>
+                </div>
             </div>
+        </div>
+
+        <!-- 操作提示 -->
+        <div class="mt-6 bg-blue-50 p-3 rounded text-sm text-blue-700 fade-in">
+            <i class="fa fa-info-circle mr-1"></i> 提示：自动处理全角逗号和多个小数点问题，支持快捷键 <kbd class="px-2 py-1 bg-white border rounded text-xs">Ctrl+Z</kbd> 撤销 和 <kbd class="px-2 py-1 bg-white border rounded text-xs">Ctrl+Y</kbd> 重做 操作，自动识别并保留年份不转换
         </div>
     </main>
 
@@ -593,12 +754,14 @@
         const unitMap = {
             '1': '元',
             '1000': '千',
-            '10000': '万',
-            '1000000': '百万',
-            '10000000': '千万',
-            '100000000': '亿',
-            '1000000000': '十亿'
+            '10000': '万'
         };
+        
+        // 年份识别相关 - 新增代码
+        // 识别年份的正则，匹配 X年 格式（X为1-2位数字），并捕获数字部分
+        const yearRegex = /(\b\d{1,2}年\b)/g; 
+        // 存储识别出的年份数字，用于后续过滤
+        const recognizedYears = []; 
         
         // 核心变量
         let conversionHistory = [];
@@ -607,7 +770,6 @@
         let extractedNumbersWithoutUnits = [];
         let convertedNumbers = []; // 存储转换后的数字（数值类型）
         let savedResults = []; // 保存的结果记录
-        let formatIssuesFound = false; // 标记是否发现格式问题
         
         // DOM元素
         const inputText = document.getElementById('input-text');
@@ -624,8 +786,8 @@
         const closeStatsBtn = document.getElementById('close-stats-btn');
         const statsContent = document.getElementById('stats-content');
         const copyStatsBtn = document.getElementById('copy-stats-btn');
-        const extractedNumbersContainer = document.getElementById('extractedNumbersContainer');
-        const extractedNumbersList = document.getElementById('extractedNumbersList');
+        const extractedNumbersContainer = document.getElementById('extracted-numbers-container');
+        const extractedNumbersList = document.getElementById('extracted-numbers-list');
         const unitSelect = document.getElementById('unit-select');
         const decimalSelect = document.getElementById('decimal-select');
         const directionSelect = document.getElementById('direction-select');
@@ -646,33 +808,43 @@
         const closeHistoryBtn = document.getElementById('close-history-btn');
         const clearHistoryBtn = document.getElementById('clear-history-btn');
         const historyList = document.getElementById('history-list');
-        const importExportBtn = document.getElementById('import-export-btn');
+        const exportHistoryBtn = document.getElementById('export-history-btn');
+        const importHistoryBtn = document.getElementById('import-history-btn');
+        const historySearch = document.getElementById('history-search');
+        const historyFilter = document.getElementById('history-filter');
         const mobileMenuBtn = document.getElementById('mobile-menu-btn');
         const mobileMenu = document.getElementById('mobile-menu');
         const themeToggle = document.getElementById('theme-toggle');
         const mobileThemeToggle = document.getElementById('mobile-theme-toggle');
-        const formatIssueAlert = document.getElementById('format-issue-alert'); // 格式问题提示
+        const helpBtn = document.getElementById('help-btn');
+        const mobileHelpBtn = document.getElementById('mobile-help-btn');
+        const helpModal = document.getElementById('help-modal');
+        const closeHelpBtn = document.getElementById('close-help-btn');
+        const closeHelpBtn2 = document.getElementById('close-help-btn-2');
+        // 滑动选项元素
+        const removeUnitToggle = document.getElementById('remove-unit-toggle');
         // 数字统计摘要元素
         const numbersCount = document.getElementById('numbers-count');
         const numbersSum = document.getElementById('numbers-sum');
+        const numbersAvg = document.getElementById('numbers-avg');
         const numbersUnit = document.getElementById('numbers-unit');
 
-        // 示例文本 - 包含各种格式问题的数字
+        // 示例文本 - 包含年份和各种格式问题
         const sampleText = `财务数据示例（包含各种格式问题）：
 
-1. 2022年季度营收：
-   - Q1： 1,234,567.89 元
-   - Q2： 2，345，678.90 元 （中文逗号）
-   - Q3： 3,456，789.01 元 （混合逗号）
-   - Q4： 4 ,567,890.12 元 （带空格的逗号）
+1. 22年季度营收：
+   - Q1： 1.234.567.89 元 （多个小数点）
+   - Q2： 2，345，678.90 元 （全角逗号）
+   - Q3： 3， 456， 789.01 元 （全角逗号带空格）
+   - Q4： 4，567，890.12 元
 
-2. 2023年成本支出：
-   - 人力成本： 2,500 ,000 元 （多个空格）
+2. 2023年度成本支出：
+   - 人力成本： 2.500.000 元 （多个小数点）
    - 运营成本： 1，850，678.34 元
-   - 营销成本： 987 ,654.32 元
+   - 营销成本： 987，654.32 元
 
-3. 2024年利润分析：
-   - 总利润： 6,266,893.26 元
+3. 30年利润分析：
+   - 总利润： 6.266.893.26 元 （多个小数点）
    - 利润率： 28.75%
    - 同比增长：15.32%`;
 
@@ -690,8 +862,6 @@
             // 实时更新输入统计
             inputText.addEventListener('input', () => {
                 inputStats.textContent = `${inputText.value.length}个字`;
-                // 隐藏格式问题提示
-                formatIssueAlert.classList.add('hidden');
             });
 
             // 转换按钮
@@ -705,14 +875,14 @@
                 noteInput.value = '';
                 inputStats.textContent = '0个字';
                 extractedNumbersContainer.classList.add('hidden');
-                formatIssueAlert.classList.add('hidden');
                 [copyAllBtn, copyNumbersBtn, exportTxtBtn, statsBtn, saveResultBtn].forEach(btn => btn.disabled = true);
                 conversionHistory = [];
                 historyIndex = -1;
                 currentInput = '';
                 extractedNumbersWithoutUnits = [];
                 convertedNumbers = [];
-                formatIssuesFound = false;
+                // 清空年份识别数组
+                recognizedYears.length = 0;
                 // 更新统计摘要
                 updateNumbersSummary();
             });
@@ -721,6 +891,10 @@
             sampleBtn.addEventListener('click', () => {
                 inputText.value = sampleText;
                 inputStats.textContent = `${inputText.value.length}个字`;
+                // 平滑滚动到输入区域
+                inputText.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                // 添加焦点
+                inputText.focus();
             });
 
             // 复制全部
@@ -835,6 +1009,10 @@
             // 移动端菜单切换
             mobileMenuBtn.addEventListener('click', () => {
                 mobileMenu.classList.toggle('hidden');
+                // 添加动画效果
+                if (!mobileMenu.classList.contains('hidden')) {
+                    mobileMenu.classList.add('fade-in');
+                }
             });
 
             // 输出框编辑时更新提取的数字
@@ -846,7 +1024,7 @@
             });
 
             // 转换设置变化时重新转换（如果已有内容）
-            [unitSelect, decimalSelect, directionSelect, keywordInput].forEach(el => {
+            [unitSelect, decimalSelect, directionSelect, keywordInput, removeUnitToggle].forEach(el => {
                 el.addEventListener('change', () => {
                     if (currentInput && currentInput.trim()) {
                         convertNumbers();
@@ -917,7 +1095,14 @@
             });
             
             // 导出记录
-            importExportBtn.addEventListener('click', exportHistory);
+            exportHistoryBtn.addEventListener('click', exportHistory);
+            
+            // 导入记录
+            importHistoryBtn.addEventListener('click', importHistory);
+            
+            // 历史记录搜索和过滤
+            historySearch.addEventListener('input', filterHistory);
+            historyFilter.addEventListener('change', filterHistory);
             
             // 主题切换
             themeToggle.addEventListener('click', toggleTheme);
@@ -925,8 +1110,30 @@
                 mobileMenu.classList.add('hidden');
                 toggleTheme();
             });
+            
+            // 帮助按钮
+            helpBtn.addEventListener('click', showHelpModal);
+            mobileHelpBtn.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+                showHelpModal();
+            });
+            
+            // 关闭帮助弹窗
+            closeHelpBtn.addEventListener('click', () => {
+                helpModal.classList.add('hidden');
+            });
+            closeHelpBtn2.addEventListener('click', () => {
+                helpModal.classList.add('hidden');
+            });
+            
+            // 点击帮助弹窗外部关闭
+            helpModal.addEventListener('click', (e) => {
+                if (e.target === helpModal) {
+                    helpModal.classList.add('hidden');
+                }
+            });
         }
-
+        
         // 切换主题模式
         function toggleTheme() {
             const isDark = document.documentElement.classList.toggle('dark-mode');
@@ -948,31 +1155,87 @@
                 mobileIcon.className = 'fa fa-moon-o text-gray-600';
             }
         }
-
-        // 判断是否为年份（2000-2100之间的4位数字）
-        function isYear(number) {
-            const num = parseInt(number, 10);
-            return !isNaN(num) && number.length === 4 && num >= 2000 && num <= 2100;
+        
+        // 显示帮助弹窗
+        function showHelpModal() {
+            helpModal.classList.remove('hidden');
         }
 
-        // 清理数字格式 - 处理中文逗号、带空格的逗号等问题
-        function cleanNumberFormat(numberStr) {
-            // 检查是否有格式问题
-            const hasChineseComma = /，/.test(numberStr);
-            const hasSpacesAroundComma = /\s*[,，]\s*/.test(numberStr);
+        // 处理所有文本中的格式问题（自动处理全角逗号和多个小数点）
+        function processTextFormat(text) {
+            // 1. 处理所有类型的全角逗号及其可能的空格
+            let processed = text
+                // 处理"， "（全角逗号后带空格）
+                .replace(/，\s+/g, ',')
+                // 处理" ，"（全角逗号前带空格）
+                .replace(/\s+，/g, ',')
+                // 处理" ， "（全角逗号前后带空格）
+                .replace(/\s+，\s+/g, ',')
+                // 处理单独的全角逗号"，"
+                .replace(/，/g, ',');
             
-            if (hasChineseComma || hasSpacesAroundComma) {
-                formatIssuesFound = true;
+            // 2. 处理多个小数点：只保留最后一个小数点，前面的替换为逗号
+            processed = processed.replace(/(\d+)(\.\d+)+/g, (match) => {
+                const lastDotIndex = match.lastIndexOf('.');
+                if (lastDotIndex === -1) return match;
+                
+                return match.substring(0, lastDotIndex).replace(/\./g, ',') + 
+                       match.substring(lastDotIndex);
+            });
+            
+            return processed;
+        }
+
+        // 1. 预处理：标记文本中的年份 - 新增代码
+        function markYears(text) {
+            return text.replace(yearRegex, (match, yearPart) => {
+                const yearNum = yearPart.replace('年', '');
+                recognizedYears.push(Number(yearNum));
+                // 用特殊标记占位，避免转换时干扰
+                return `{{YEAR_${yearNum}}}`; 
+            });
+        }
+
+        // 2. 后处理：恢复文本并过滤提取结果 - 新增代码
+        function filterYearsFromExtracted(text, extractedNumbers) {
+            // 恢复文本里的年份表述
+            const restoredText = text.replace(/{{YEAR_\d+}}/g, (match) => {
+                const yearNum = match.replace('{{YEAR_', '').replace('}}', '');
+                return `${yearNum}年`;
+            });
+            // 过滤提取结果里的年份数字
+            return {
+                restoredText,
+                filteredNumbers: extractedNumbers.filter(num => !recognizedYears.includes(Number(num)))
+            }; 
+        }
+
+        // 判断是否为年份（2000-2100之间的4位数字，或"年"、"年度"前00-30区间的数字）
+        function isYear(number, context = '') {
+            // 检查是否是已识别的年份数字
+            if (recognizedYears.includes(Number(number))) {
+                return true;
             }
             
-            // 替换中文逗号为英文逗号
-            let cleaned = numberStr.replace(/，/g, ',');
-            // 移除逗号周围的空格
-            cleaned = cleaned.replace(/\s*,\s*/g, ',');
-            // 移除首尾空格
-            cleaned = cleaned.trim();
+            // 检查是否是"年"或"年度"前的数字，且在00-30之间
+            if (context && (context.includes('年') || context.includes('年度'))) {
+                const num = parseInt(number, 10);
+                if (!isNaN(num) && num >= 0 && num <= 30) {
+                    return true; // 识别为2000-2030年
+                }
+            }
             
-            return cleaned;
+            // 检查数字后面是否紧跟"年"字（修复"23年"这种情况）
+            if (context && context.startsWith('年')) {
+                const num = parseInt(number, 10);
+                if (!isNaN(num) && num >= 0 && num <= 30) {
+                    return true; // 识别为2000-2030年
+                }
+            }
+            
+            // 检查是否是2000-2100之间的4位数字
+            const num = parseInt(number, 10);
+            return !isNaN(num) && number.length === 4 && num >= 2000 && num <= 2100;
         }
 
         // 计算文本字数
@@ -996,14 +1259,20 @@
             const unit = parseInt(unitValue);
             const decimals = parseInt(decimalSelect.value);
             const direction = directionSelect.value;
-            
-            // 重置格式问题标记
-            formatIssuesFound = false;
+            const removeUnit = removeUnitToggle.checked;
             
             // 保存历史记录（包含关键字和备注）
             saveToHistory(text, outputContainer.value, keywordStr, noteStr);
             
-            // 执行转换
+            // 重置年份识别数组
+            recognizedYears.length = 0;
+            
+            // 1. 预处理：标记年份 - 新增代码
+            let markedText = markYears(text);
+            
+            // 2. 处理文本格式（全角逗号和多个小数点）
+            let processedText = processTextFormat(markedText);
+            
             let convertedText = "";
             extractedNumbersWithoutUnits = [];
             convertedNumbers = []; // 重置转换后的数字数组
@@ -1018,17 +1287,17 @@
                     
                     keywords.forEach(keyword => {
                         // 构建匹配关键字及后续数字的正则表达式
-                        // 增强的正则表达式，支持各种格式的数字
-                        const regex = new RegExp(`(${keyword}[^\\d]*)(-?\\d+(?:[ ,，]\\s*\\d{3})*(?:\\.\\d+)?)`, 'gi');
+                        const regex = new RegExp(`(${keyword}[^\\d]*)(-?\\d+(?:[ ,.]\\d{3})*(?:\\.\\d+)?)`, 'gi');
                         let match;
                         
                         // 查找所有匹配项
-                        while ((match = regex.exec(text)) !== null) {
+                        while ((match = regex.exec(processedText)) !== null) {
                             // match[1] 是关键字及数字前的非数字字符
                             // match[2] 是数字
                             results.push({
                                 keyword: match[1],
-                                number: match[2]
+                                number: match[2],
+                                context: match[1] // 上下文用于年份识别
                             });
                         }
                     });
@@ -1036,13 +1305,13 @@
                     // 处理结果，转换数字并构建输出文本
                     if (results.length > 0) {
                         convertedText = results.map(item => {
-                            // 清理数字格式（处理中文逗号、带空格的逗号等问题）
-                            const cleanNumStr = cleanNumberFormat(item.number).replace(/,/g, '');
-                            const originalClean = cleanNumberFormat(item.number);
+                            // 清理数字格式
+                            let cleanNumStr = item.number;
+                            cleanNumStr = cleanNumStr.replace(/[ ,]/g, '');
                             const cleanNum = parseFloat(cleanNumStr);
                             
                             // 检查是否为年份，如果是则不转换
-                            if (isYear(cleanNumStr)) {
+                            if (isYear(cleanNumStr, item.context)) {
                                 return item.keyword + item.number;
                             }
                             
@@ -1060,7 +1329,12 @@
                             extractedNumbersWithoutUnits.push(rounded.toString());
                             convertedNumbers.push(rounded); // 保存数值类型的数字用于统计
                             
-                            return item.keyword + rounded + unitName;
+                            // 根据设置决定是否添加单位
+                            const resultWithUnit = removeUnit 
+                                ? rounded.toString() 
+                                : rounded + unitName;
+                                
+                            return item.keyword + resultWithUnit;
                         }).join('\n');
                     } else {
                         // 没有找到匹配的关键字和数字
@@ -1072,15 +1346,18 @@
                 }
             } else {
                 // 没有输入关键字，处理全部内容
-                convertedText = convertAllNumbers(text, unit, decimals, direction, unitName);
+                convertedText = convertAllNumbers(processedText, unit, decimals, direction, unitName, removeUnit);
             }
             
-            // 如果发现格式问题，显示提示
-            if (formatIssuesFound) {
-                formatIssueAlert.classList.remove('hidden');
-            } else {
-                formatIssueAlert.classList.add('hidden');
-            }
+            // 3. 后处理：恢复年份标记并过滤数字 - 新增代码
+            const { restoredText, filteredNumbers } = filterYearsFromExtracted(convertedText, extractedNumbersWithoutUnits);
+            convertedText = restoredText;
+            extractedNumbersWithoutUnits = filteredNumbers;
+            
+            // 更新转换后数字数组（过滤年份）
+            convertedNumbers = extractedNumbersWithoutUnits
+                .map(numStr => parseFloat(numStr))
+                .filter(num => !isNaN(num));
             
             // 更新界面
             outputContainer.value = convertedText;
@@ -1093,21 +1370,27 @@
             [copyAllBtn, copyNumbersBtn, exportTxtBtn, statsBtn, saveResultBtn].forEach(btn => btn.disabled = false);
             extractedNumbersContainer.classList.remove('hidden');
             
-            showNotification(formatIssuesFound 
-                ? '转换完成，已自动处理不规范的数字格式并排除年份' 
-                : '转换完成，已自动排除年份不转换');
+            // 平滑滚动到结果区域
+            outputContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            
+            showNotification('转换完成，已自动处理格式并排除年份不转换');
         }
 
         // 转换所有数字的辅助函数（排除年份）
-        function convertAllNumbers(text, unit, decimals, direction, unitName) {
-            // 增强的正则表达式，匹配各种格式的数字
-            // 包括带空格、中文逗号、英文逗号等情况
-            return text.replace(/-?\d+(?:[ ,，]\s*\d{3})*(?:\.\d+)?/g, (match) => {
-                // 清理数字格式（处理中文逗号、带空格的逗号等问题）
-                const cleanNumStr = cleanNumberFormat(match).replace(/,/g, '');
+        function convertAllNumbers(text, unit, decimals, direction, unitName, removeUnit) {
+            // 匹配数字，包括带空格、逗号和小数点的情况
+            // 改进正则表达式，确保能捕获数字后的"年"字作为上下文
+            return text.replace(/-?\d+(?:[ ,.]\d{3})*(?:\.\d+)?(?=\D|$)/g, (match, offset, original) => {
+                // 获取上下文用于年份识别（前20个字符和后10个字符，特别关注数字后的"年"字）
+                const contextBefore = original.substring(Math.max(0, offset - 20), offset);
+                const contextAfter = original.substring(offset + match.length, Math.min(original.length, offset + match.length + 10));
+                const context = contextBefore + "|" + contextAfter; // 使用分隔符区分前后上下文
+                
+                // 清除数字中的空格和逗号
+                const cleanNumStr = match.replace(/[ ,]/g, '');
                 
                 // 检查是否为年份，如果是则不转换
-                if (isYear(cleanNumStr)) {
+                if (isYear(cleanNumStr, context)) {
                     return match;
                 }
                 
@@ -1126,22 +1409,27 @@
                 extractedNumbersWithoutUnits.push(rounded.toString());
                 convertedNumbers.push(rounded); // 保存数值类型的数字用于统计
                 
-                // 返回带单位的结果
-                return `${rounded}${unitName}`;
+                // 根据设置决定是否添加单位
+                return removeUnit ? rounded.toString() : `${rounded}${unitName}`;
             });
         }
 
         // 提取数字（分离数字和单位，并且排除年份）
         function extractNumbersFromText(text) {
+            // 重置年份识别数组
+            recognizedYears.length = 0;
+            // 先标记年份
+            const markedText = markYears(text);
+            
             // 匹配带单位的数字
-            const numberRegex = /-?\d+\.?\d*[元万千百亿]* /g;
-            const matches = text.match(numberRegex) || [];
+            const numberRegex = /-?\d+\.?\d*[元万千]*/g;
+            const matches = markedText.match(numberRegex) || [];
             
             // 分离数字和单位，并过滤掉年份
             extractedNumbersWithoutUnits = matches
                 .map(match => {
                     // 去除任何单位字符，只保留数字
-                    return match.replace(/[元万千百亿 ]/g, '');
+                    return match.replace(/[元万千]/g, '');
                 })
                 .filter(numStr => {
                     // 过滤掉年份
@@ -1174,12 +1462,14 @@
         function updateNumbersSummary() {
             const count = convertedNumbers.length;
             const sum = convertedNumbers.reduce((acc, num) => acc + num, 0);
+            const avg = count > 0 ? sum / count : 0;
             const unitName = unitMap[unitSelect.value];
             const decimals = parseInt(decimalSelect.value);
             
             numbersCount.textContent = count;
             numbersSum.textContent = sum.toFixed(decimals);
-            numbersUnit.textContent = unitName;
+            numbersAvg.textContent = avg.toFixed(decimals);
+            numbersUnit.textContent = removeUnitToggle.checked ? '' : unitName;
         }
 
         // 更新对比视图（高亮关键字和转换的数字）
@@ -1202,20 +1492,16 @@
             
             // 高亮年份
             originalHighlighted = originalHighlighted.replace(
-                /\b20\d{2}\b/g, // 匹配2000-2099年的年份
+                /(\b20\d{2}\b)|(\b\d{1,2}(?=年|年度\b))/g, // 匹配2000-2099年的年份，以及"年"或"年度"前的数字
                 (year) => `<span class="text-purple-600 font-medium">${year}</span>`
             );
             
-            // 高亮格式问题（中文逗号、带空格的逗号）
-            originalHighlighted = originalHighlighted.replace(
-                /\d+\s*，\s*\d+/g, // 中文逗号
-                (match) => `<span class="bg-yellow-100 px-1 rounded">${match}</span>`
-            );
-            
-            originalHighlighted = originalHighlighted.replace(
-                /\d+\s*,\s*\d+/g, // 带空格的英文逗号
-                (match) => `<span class="bg-yellow-100 px-1 rounded">${match}</span>`
-            );
+            // 高亮原始文本中的格式问题（全角逗号和多个小数点）
+            originalHighlighted = originalHighlighted
+                // 高亮全角逗号
+                .replace(/\s*，\s*/g, match => `<span class="bg-red-100 text-red-800">${match}</span>`)
+                // 高亮多个小数点
+                .replace(/(\d+)(\.\d+){2,}/g, match => `<span class="bg-red-100 text-red-800">${match}</span>`);
             
             originalCompare.innerHTML = originalHighlighted;
             
@@ -1236,15 +1522,16 @@
             
             // 高亮年份（在转换结果中保持）
             convertedHighlighted = convertedHighlighted.replace(
-                /\b20\d{2}\b/g,
+                /(\b20\d{2}\b)|(\b\d{1,2}(?=年|年度\b))/g,
                 (year) => `<span class="text-purple-600 font-medium">${year}</span>`
             );
             
-            // 高亮转换的数字
+            // 高亮格式化后的数字（正确的逗号和小数点）
             convertedHighlighted = convertedHighlighted.replace(
-                /-?\d+\.?\d*[元万千百亿]+/g, 
+                /-?\d+(?:,\d{3})*(?:\.\d+)?[元万千]*/g, 
                 (num) => `<span class="highlight-diff">${num}</span>`
             );
+            
             convertedCompare.innerHTML = convertedHighlighted;
             
             // 更新字数统计
@@ -1275,7 +1562,12 @@
             const average = sum / count;
             const min = Math.min(...convertedNumbers);
             const max = Math.max(...convertedNumbers);
-            const unitName = unitMap[unitSelect.value];
+            const range = max - min;
+            // 计算标准差
+            const variance = convertedNumbers.reduce((acc, num) => acc + Math.pow(num - average, 2), 0) / count;
+            const stdDev = Math.sqrt(variance);
+            
+            const unitName = removeUnitToggle.checked ? '' : unitMap[unitSelect.value];
             const decimals = parseInt(decimalSelect.value);
             
             // 计算每个数字的占比（相对于总和）
@@ -1296,6 +1588,8 @@
                             <li class="flex justify-between"><span class="text-gray-600">平均值（${unitName}）：</span> <span class="font-medium">${average.toFixed(decimals)}</span></li>
                             <li class="flex justify-between"><span class="text-gray-600">最小值（${unitName}）：</span> <span class="font-medium">${min.toFixed(decimals)}</span></li>
                             <li class="flex justify-between"><span class="text-gray-600">最大值（${unitName}）：</span> <span class="font-medium">${max.toFixed(decimals)}</span></li>
+                            <li class="flex justify-between"><span class="text-gray-600">极差（${unitName}）：</span> <span class="font-medium">${range.toFixed(decimals)}</span></li>
+                            <li class="flex justify-between"><span class="text-gray-600">标准差：</span> <span class="font-medium">${stdDev.toFixed(decimals)}</span></li>
                         </ul>
                     </div>
                     
@@ -1382,13 +1676,13 @@
                 const text = inputText.value;
                 
                 keywords.forEach(keyword => {
-                    const regex = new RegExp(`(${keyword}[^\\d]*)(-?\\d+(?:[ ,，]\\s*\\d{3})*(?:\\.\\d+)?)`, 'gi');
+                    const regex = new RegExp(`(${keyword}[^\\d]*)(-?\\d+(?:[ ,.]\\d{3})*(?:\\.\\d+)?)`, 'gi');
                     let match;
                     
                     while ((match = regex.exec(text)) !== null) {
                         // 检查是否为年份，如果是则跳过
-                        const cleanNumStr = cleanNumberFormat(match[2]).replace(/,/g, '');
-                        if (isYear(cleanNumStr)) continue;
+                        const cleanNumStr = match[2].replace(/[ ,]/g, '');
+                        if (isYear(cleanNumStr, match[1])) continue;
                         
                         keywordResults.push({
                             keyword: match[1],
@@ -1419,6 +1713,7 @@
                 unitName: unitMap[unitSelect.value],
                 decimals: decimalSelect.value,
                 direction: directionSelect.value,
+                removeUnit: removeUnitToggle.checked,
                 keyword: keywordInput.value.trim(),
                 timestamp: new Date().getTime()
             };
@@ -1454,9 +1749,52 @@
             }
         }
 
+        // 过滤历史记录
+        function filterHistory() {
+            const searchTerm = historySearch.value.toLowerCase();
+            const filterType = historyFilter.value;
+            const now = new Date().getTime();
+            const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000; // 30天前
+            
+            let filteredResults = [...savedResults];
+            
+            // 应用搜索过滤
+            if (searchTerm) {
+                filteredResults = filteredResults.filter(item => 
+                    item.note.toLowerCase().includes(searchTerm) ||
+                    item.keyword.toLowerCase().includes(searchTerm) ||
+                    item.input.toLowerCase().includes(searchTerm) ||
+                    item.output.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            // 应用类型过滤
+            if (filterType === 'keyword') {
+                filteredResults = filteredResults.filter(item => item.keyword.trim() !== '');
+            } else if (filterType === 'recent') {
+                filteredResults = filteredResults.filter(item => item.timestamp >= thirtyDaysAgo);
+            }
+            
+            // 渲染过滤后的结果
+            if (filteredResults.length === 0) {
+                historyList.innerHTML = `
+                    <div class="text-center text-gray-500 py-8">
+                        <i class="fa fa-search text-4xl mb-2 opacity-30"></i>
+                        <p>未找到匹配的记录</p>
+                        <p class="text-xs mt-1">请尝试其他搜索条件</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            renderHistoryList(filteredResults);
+        }
+
         // 渲染历史记录列表（显示数字总数和总和）
-        function renderHistoryList() {
-            if (savedResults.length === 0) {
+        function renderHistoryList(results = null) {
+            const displayResults = results || savedResults;
+            
+            if (displayResults.length === 0) {
                 historyList.innerHTML = `
                     <div class="text-center text-gray-500 py-8">
                         <i class="fa fa-folder-open text-4xl mb-2 opacity-30"></i>
@@ -1467,7 +1805,7 @@
                 return;
             }
             
-            historyList.innerHTML = savedResults.map((item, index) => {
+            historyList.innerHTML = displayResults.map((item, index) => {
                 // 构建关键字和数字组合的HTML
                 let keywordResultsHtml = '';
                 if (item.keywordResults && item.keywordResults.length > 0) {
@@ -1475,13 +1813,14 @@
                         <div class="mt-2 bg-gray-50 p-2 rounded text-xs">
                             <p class="font-medium text-gray-700 mb-1">关键字与结果：</p>
                             <ul class="space-y-1">
-                                ${item.keywordResults.map((kr, idx) => `
+                                ${item.keywordResults.slice(0, 3).map((kr, idx) => `
                                     <li class="flex flex-wrap">
                                         <span class="text-blue-600 font-medium">${kr.keyword}</span>
                                         <span class="mx-1 text-gray-500">→</span>
                                         <span class="text-green-600">${kr.convertedNumber}</span>
                                     </li>
                                 `).join('')}
+                                ${item.keywordResults.length > 3 ? `<li class="text-gray-500">... 还有 ${item.keywordResults.length - 3} 项</li>` : ''}
                             </ul>
                         </div>
                     `;
@@ -1493,11 +1832,34 @@
                     `;
                 }
                 
+                // 显示特殊模式
+                let modeIndicators = '';
+                if (item.removeUnit) {
+                    modeIndicators = '<div class="mt-2 flex flex-wrap gap-1">';
+                    modeIndicators += '<span class="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded">无单位</span>';
+                    modeIndicators += '</div>';
+                }
+                
+                // 计算记录的年龄
+                const now = new Date().getTime();
+                const diffInSeconds = Math.floor((now - item.timestamp) / 1000);
+                let ageText = '';
+                
+                if (diffInSeconds < 60) {
+                    ageText = `${diffInSeconds}秒前`;
+                } else if (diffInSeconds < 3600) {
+                    ageText = `${Math.floor(diffInSeconds / 60)}分钟前`;
+                } else if (diffInSeconds < 86400) {
+                    ageText = `${Math.floor(diffInSeconds / 3600)}小时前`;
+                } else {
+                    ageText = `${Math.floor(diffInSeconds / 86400)}天前`;
+                }
+                
                 return `
                 <div class="history-item p-4 border border-gray-200 rounded-lg hover:shadow-md cursor-pointer" data-id="${item.id}">
                     <div class="flex justify-between items-start mb-2">
                         <h4 class="font-medium text-gray-800">${item.note}</h4>
-                        <span class="text-xs text-gray-500">${formatDate(new Date(item.timestamp))}</span>
+                        <span class="text-xs text-gray-500" title="${formatDate(new Date(item.timestamp))}">${ageText}</span>
                     </div>
                     <div class="text-sm text-gray-600 mb-2">
                         <span class="inline-block bg-gray-100 px-2 py-0.5 rounded text-xs mr-2">
@@ -1516,6 +1878,7 @@
                         数字总数(已排除年份): ${item.stats.count} 个 | 总和: ${item.stats.sum}${item.unitName}
                     </div>
                     ${keywordResultsHtml}
+                    ${modeIndicators}
                     <div class="mt-3 flex justify-end space-x-2">
                         <button class="view-history-item text-blue-600 hover:text-blue-800 text-xs" data-id="${item.id}">
                             <i class="fa fa-eye mr-1"></i>查看
@@ -1526,6 +1889,7 @@
                         <button class="delete-history-item text-red-600 hover:text-red-800 text-xs" data-id="${item.id}">
                             <i class="fa fa-trash mr-1"></i>删除
                         </button>
+                    
                     </div>
                 </div>
             `;
@@ -1580,6 +1944,10 @@
             unitSelect.value = item.unit;
             decimalSelect.value = item.decimals;
             directionSelect.value = item.direction;
+            // 恢复特殊设置
+            if (item.removeUnit !== undefined) {
+                removeUnitToggle.checked = item.removeUnit;
+            }
             
             // 更新统计
             inputStats.textContent = `${item.input.length}个字`;
@@ -1601,6 +1969,9 @@
             
             // 关闭历史记录弹窗
             historyModal.classList.add('hidden');
+            
+            // 平滑滚动到输入区域
+            inputText.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             
             showNotification(`已加载记录：${item.note}`);
         }
@@ -1653,6 +2024,9 @@
         function showHistoryModal() {
             renderHistoryList();
             historyModal.classList.remove('hidden');
+            // 清空搜索框
+            historySearch.value = '';
+            historyFilter.value = 'all';
         }
 
         // 导出历史记录
@@ -1665,7 +2039,7 @@
             // 准备导出数据
             const exportData = {
                 app: "数字单位转换器",
-                version: "1.0",
+                version: "1.1",
                 exportDate: new Date().getTime(),
                 records: savedResults
             };
@@ -1679,6 +2053,60 @@
             URL.revokeObjectURL(url);
             
             showNotification(`已导出 ${savedResults.length} 条记录`);
+        }
+        
+        // 导入历史记录
+        function importHistory() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                
+                reader.onload = (event) => {
+                    try {
+                        const importData = JSON.parse(event.target.result);
+                        
+                        // 验证导入数据
+                        if (!importData || !importData.records || !Array.isArray(importData.records)) {
+                            showNotification('导入失败：无效的文件格式', false);
+                            return;
+                        }
+                        
+                        // 合并记录（去重）
+                        const existingIds = new Set(savedResults.map(r => r.id));
+                        const newRecords = importData.records.filter(r => !existingIds.has(r.id));
+                        
+                        if (newRecords.length === 0) {
+                            showNotification('没有新的记录可导入', false);
+                            return;
+                        }
+                        
+                        // 添加新记录并保存
+                        savedResults = [...newRecords, ...savedResults];
+                        
+                        // 限制记录数量
+                        if (savedResults.length > 50) {
+                            savedResults = savedResults.slice(0, 50);
+                        }
+                        
+                        localStorage.setItem('conversionResults', JSON.stringify(savedResults));
+                        renderHistoryList();
+                        showNotification(`成功导入 ${newRecords.length} 条记录`);
+                    } catch (error) {
+                        showNotification('导入失败：文件解析错误', false);
+                        console.error('导入错误:', error);
+                    }
+                };
+                
+                reader.readAsText(file);
+            };
+            
+            input.click();
         }
 
         // 格式化日期
