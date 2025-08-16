@@ -578,7 +578,7 @@
         <div id="extracted-numbers-container" class="mt-8 bg-white rounded-xl shadow-card p-6 hidden fade-in transform hover:shadow-card-hover transition-all duration-300">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
                 <h3 class="text-lg font-semibold text-gray-800 flex items-center">
-                    <i class="fa fa-list-ol text-orange-500 mr-2"></i>提取的数字结果 <span class="text-sm font-normal text-gray-500 ml-2">(已自动排除年份)</span>
+                    <i class="fa fa-list-ol text-orange-500 mr-2"></i>提取的数字结果 <span class="text-sm font-normal text-gray-500 ml-2">(已自动排除年份和比率)</span>
                 </h3>
                 <!-- 数字统计摘要 -->
                 <div class="flex flex-wrap gap-4 bg-gray-50 px-4 py-2 rounded-lg w-full md:w-auto">
@@ -721,6 +721,7 @@
                             <ul class="list-disc pl-5 space-y-2 text-gray-600">
                                 <li><strong>自动格式处理</strong>：自动处理各种全角逗号（，、， 、 ，、，）和多个小数点问题（如1.234.567.89会转为1,234,567.89）</li>
                                 <li><strong>年份识别</strong>：自动识别2000-2100年的年份，以及"年"或"年度"前00-30区间的数字作为年份</li>
+                                <li><strong>比率识别</strong>：自动识别带百分号的比率（如1.1%、99.99%），不进行单位转换</li>
                                 <li><strong>单位去除</strong>：可以选择只显示转换后的数字，不显示单位</li>
                             </ul>
                         </div>
@@ -745,7 +746,7 @@
 
         <!-- 操作提示 -->
         <div class="mt-6 bg-blue-50 p-3 rounded text-sm text-blue-700 fade-in">
-            <i class="fa fa-info-circle mr-1"></i> 提示：自动处理全角逗号和多个小数点问题，支持快捷键 <kbd class="px-2 py-1 bg-white border rounded text-xs">Ctrl+Z</kbd> 撤销 和 <kbd class="px-2 py-1 bg-white border rounded text-xs">Ctrl+Y</kbd> 重做 操作，自动识别并保留年份不转换
+            <i class="fa fa-info-circle mr-1"></i> 提示：自动处理全角逗号和多个小数点问题，自动识别带百分号的比率和年份并保留不转换，支持快捷键 <kbd class="px-2 py-1 bg-white border rounded text-xs">Ctrl+Z</kbd> 撤销 和 <kbd class="px-2 py-1 bg-white border rounded text-xs">Ctrl+Y</kbd> 重做 操作
         </div>
     </main>
 
@@ -757,10 +758,8 @@
             '10000': '万'
         };
         
-        // 年份识别相关 - 新增代码
-        // 识别年份的正则，匹配 X年 格式（X为1-2位数字），并捕获数字部分
+        // 年份识别相关
         const yearRegex = /(\b\d{1,2}年\b)/g; 
-        // 存储识别出的年份数字，用于后续过滤
         const recognizedYears = []; 
         
         // 核心变量
@@ -829,7 +828,7 @@
         const numbersAvg = document.getElementById('numbers-avg');
         const numbersUnit = document.getElementById('numbers-unit');
 
-        // 示例文本 - 包含年份和各种格式问题
+        // 示例文本 - 包含年份、比率和各种格式问题
         const sampleText = `财务数据示例（包含各种格式问题）：
 
 1. 22年季度营收：
@@ -845,8 +844,9 @@
 
 3. 30年利润分析：
    - 总利润： 6.266.893.26 元 （多个小数点）
-   - 利润率： 28.75%
-   - 同比增长：15.32%`;
+   - 利润率： 28.75% （比率，不转换）
+   - 同比增长：15.32% （比率，不转换）
+   - 市场份额：5.2% （比率，不转换）`;
 
         // 初始化事件监听
         function init() {
@@ -1186,7 +1186,7 @@
             return processed;
         }
 
-        // 1. 预处理：标记文本中的年份 - 新增代码
+        // 1. 预处理：标记文本中的年份
         function markYears(text) {
             return text.replace(yearRegex, (match, yearPart) => {
                 const yearNum = yearPart.replace('年', '');
@@ -1196,7 +1196,7 @@
             });
         }
 
-        // 2. 后处理：恢复文本并过滤提取结果 - 新增代码
+        // 2. 后处理：恢复文本并过滤提取结果
         function filterYearsFromExtracted(text, extractedNumbers) {
             // 恢复文本里的年份表述
             const restoredText = text.replace(/{{YEAR_\d+}}/g, (match) => {
@@ -1238,12 +1238,27 @@
             return !isNaN(num) && number.length === 4 && num >= 2000 && num <= 2100;
         }
 
+        // 判断是否为带百分号的比率（如1.1%、99.99%）
+        function isPercentage(number, context = '') {
+            // 检查数字本身是否包含百分号
+            if (number.includes('%')) {
+                return true;
+            }
+            
+            // 检查上下文是否包含百分号（数字后面紧跟百分号）
+            if (context && context.startsWith('%')) {
+                return true;
+            }
+            
+            return false;
+        }
+
         // 计算文本字数
         function countCharacters(text) {
             return text.length;
         }
 
-        // 转换数字函数（支持多关键字过滤和排除年份）
+        // 转换数字函数（支持多关键字过滤和排除年份、比率）
         function convertNumbers() {
             const text = inputText.value.trim();
             if (!text) {
@@ -1267,7 +1282,7 @@
             // 重置年份识别数组
             recognizedYears.length = 0;
             
-            // 1. 预处理：标记年份 - 新增代码
+            // 1. 预处理：标记年份
             let markedText = markYears(text);
             
             // 2. 处理文本格式（全角逗号和多个小数点）
@@ -1310,8 +1325,8 @@
                             cleanNumStr = cleanNumStr.replace(/[ ,]/g, '');
                             const cleanNum = parseFloat(cleanNumStr);
                             
-                            // 检查是否为年份，如果是则不转换
-                            if (isYear(cleanNumStr, item.context)) {
+                            // 检查是否为年份或比率，如果是则不转换
+                            if (isYear(cleanNumStr, item.context) || isPercentage(cleanNumStr, item.context)) {
                                 return item.keyword + item.number;
                             }
                             
@@ -1325,7 +1340,7 @@
                                 : cleanNum * unit;
                             
                             const rounded = Number(converted.toFixed(decimals));
-                            // 只有非年份的数字才会被添加到提取列表中
+                            // 只有非年份和非比率的数字才会被添加到提取列表中
                             extractedNumbersWithoutUnits.push(rounded.toString());
                             convertedNumbers.push(rounded); // 保存数值类型的数字用于统计
                             
@@ -1349,12 +1364,12 @@
                 convertedText = convertAllNumbers(processedText, unit, decimals, direction, unitName, removeUnit);
             }
             
-            // 3. 后处理：恢复年份标记并过滤数字 - 新增代码
+            // 3. 后处理：恢复年份标记并过滤数字
             const { restoredText, filteredNumbers } = filterYearsFromExtracted(convertedText, extractedNumbersWithoutUnits);
             convertedText = restoredText;
             extractedNumbersWithoutUnits = filteredNumbers;
             
-            // 更新转换后数字数组（过滤年份）
+            // 更新转换后数字数组（过滤年份和比率）
             convertedNumbers = extractedNumbersWithoutUnits
                 .map(numStr => parseFloat(numStr))
                 .filter(num => !isNaN(num));
@@ -1373,15 +1388,15 @@
             // 平滑滚动到结果区域
             outputContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             
-            showNotification('转换完成，已自动处理格式并排除年份不转换');
+            showNotification('转换完成，已自动处理格式并排除年份和比率不转换');
         }
 
-        // 转换所有数字的辅助函数（排除年份）
+        // 转换所有数字的辅助函数（排除年份和比率）
         function convertAllNumbers(text, unit, decimals, direction, unitName, removeUnit) {
             // 匹配数字，包括带空格、逗号和小数点的情况
-            // 改进正则表达式，确保能捕获数字后的"年"字作为上下文
+            // 改进正则表达式，确保能捕获数字后的"年"字或"%"作为上下文
             return text.replace(/-?\d+(?:[ ,.]\d{3})*(?:\.\d+)?(?=\D|$)/g, (match, offset, original) => {
-                // 获取上下文用于年份识别（前20个字符和后10个字符，特别关注数字后的"年"字）
+                // 获取上下文用于年份和比率识别（前20个字符和后10个字符）
                 const contextBefore = original.substring(Math.max(0, offset - 20), offset);
                 const contextAfter = original.substring(offset + match.length, Math.min(original.length, offset + match.length + 10));
                 const context = contextBefore + "|" + contextAfter; // 使用分隔符区分前后上下文
@@ -1389,8 +1404,8 @@
                 // 清除数字中的空格和逗号
                 const cleanNumStr = match.replace(/[ ,]/g, '');
                 
-                // 检查是否为年份，如果是则不转换
-                if (isYear(cleanNumStr, context)) {
+                // 检查是否为年份或比率，如果是则不转换
+                if (isYear(cleanNumStr, context) || isPercentage(cleanNumStr, contextAfter)) {
                     return match;
                 }
                 
@@ -1405,7 +1420,7 @@
                 
                 // 保留指定小数位数
                 const rounded = Number(converted.toFixed(decimals));
-                // 只有非年份的数字才会被添加到提取列表中
+                // 只有非年份和非比率的数字才会被添加到提取列表中
                 extractedNumbersWithoutUnits.push(rounded.toString());
                 convertedNumbers.push(rounded); // 保存数值类型的数字用于统计
                 
@@ -1414,7 +1429,7 @@
             });
         }
 
-        // 提取数字（分离数字和单位，并且排除年份）
+        // 提取数字（分离数字和单位，并且排除年份和比率）
         function extractNumbersFromText(text) {
             // 重置年份识别数组
             recognizedYears.length = 0;
@@ -1425,15 +1440,15 @@
             const numberRegex = /-?\d+\.?\d*[元万千]*/g;
             const matches = markedText.match(numberRegex) || [];
             
-            // 分离数字和单位，并过滤掉年份
+            // 分离数字和单位，并过滤掉年份和比率
             extractedNumbersWithoutUnits = matches
                 .map(match => {
                     // 去除任何单位字符，只保留数字
                     return match.replace(/[元万千]/g, '');
                 })
                 .filter(numStr => {
-                    // 过滤掉年份
-                    return !isYear(numStr);
+                    // 过滤掉年份和比率
+                    return !isYear(numStr) && !numStr.includes('%');
                 });
             
             // 同时更新数值类型的数组
@@ -1449,7 +1464,7 @@
         // 更新提取的数字列表（只显示数字，不含单位）
         function updateExtractedNumbers(numbers) {
             if (numbers.length === 0) {
-                extractedNumbersList.innerHTML = '<li class="text-gray-500 italic">未找到数字（已排除年份）</li>';
+                extractedNumbersList.innerHTML = '<li class="text-gray-500 italic">未找到数字（已排除年份和比率）</li>';
                 return;
             }
             
@@ -1496,6 +1511,12 @@
                 (year) => `<span class="text-purple-600 font-medium">${year}</span>`
             );
             
+            // 高亮比率（带百分号的数字）
+            originalHighlighted = originalHighlighted.replace(
+                /-?\d+\.?\d*%/g,
+                (percentage) => `<span class="text-green-600 font-medium">${percentage}</span>`
+            );
+            
             // 高亮原始文本中的格式问题（全角逗号和多个小数点）
             originalHighlighted = originalHighlighted
                 // 高亮全角逗号
@@ -1526,6 +1547,12 @@
                 (year) => `<span class="text-purple-600 font-medium">${year}</span>`
             );
             
+            // 高亮比率（在转换结果中保持）
+            convertedHighlighted = convertedHighlighted.replace(
+                /-?\d+\.?\d*%/g,
+                (percentage) => `<span class="text-green-600 font-medium">${percentage}</span>`
+            );
+            
             // 高亮格式化后的数字（正确的逗号和小数点）
             convertedHighlighted = convertedHighlighted.replace(
                 /-?\d+(?:,\d{3})*(?:\.\d+)?[元万千]*/g, 
@@ -1549,7 +1576,7 @@
                 statsContent.innerHTML = `
                     <div class="text-center text-gray-500 py-8">
                         <i class="fa fa-bar-chart text-4xl mb-2 opacity-30"></i>
-                        <p>没有可统计的数字（已排除年份）</p>
+                        <p>没有可统计的数字（已排除年份和比率）</p>
                     </div>
                 `;
                 statsModal.classList.remove('hidden');
@@ -1583,7 +1610,7 @@
                             <i class="fa fa-info-circle text-indigo-500 mr-2"></i>基本统计
                         </h4>
                         <ul class="space-y-2 text-sm">
-                            <li class="flex justify-between"><span class="text-gray-600">数字总数（已排除年份）：</span> <span class="font-medium">${count} 个</span></li>
+                            <li class="flex justify-between"><span class="text-gray-600">数字总数（已排除年份和比率）：</span> <span class="font-medium">${count} 个</span></li>
                             <li class="flex justify-between"><span class="text-gray-600">总和（${unitName}）：</span> <span class="font-medium">${sum.toFixed(decimals)}</span></li>
                             <li class="flex justify-between"><span class="text-gray-600">平均值（${unitName}）：</span> <span class="font-medium">${average.toFixed(decimals)}</span></li>
                             <li class="flex justify-between"><span class="text-gray-600">最小值（${unitName}）：</span> <span class="font-medium">${min.toFixed(decimals)}</span></li>
@@ -1596,7 +1623,7 @@
                     <div class="bg-gray-50 p-4 rounded-lg">
                         <h4 class="font-medium text-gray-700 mb-3 flex items-center">
                             <i class="fa fa-pie-chart text-indigo-500 mr-2"></i>数值分布
-                        </h4>
+                        </h4></h4>
                         <div class="space-y-4 text-sm">
             `;
             
@@ -1680,9 +1707,9 @@
                     let match;
                     
                     while ((match = regex.exec(text)) !== null) {
-                        // 检查是否为年份，如果是则跳过
+                        // 检查是否为年份或比率，如果是则跳过
                         const cleanNumStr = match[2].replace(/[ ,]/g, '');
-                        if (isYear(cleanNumStr, match[1])) continue;
+                        if (isYear(cleanNumStr, match[1]) || isPercentage(cleanNumStr, match[1])) continue;
                         
                         keywordResults.push({
                             keyword: match[1],
@@ -1875,7 +1902,7 @@
                     <!-- 显示统计信息：数字总数和总和 -->
                     <div class="text-sm text-indigo-600 mb-2">
                         <i class="fa fa-calculator mr-1"></i>
-                        数字总数(已排除年份): ${item.stats.count} 个 | 总和: ${item.stats.sum}${item.unitName}
+                        数字总数(已排除年份和比率): ${item.stats.count} 个 | 总和: ${item.stats.sum}${item.unitName}
                     </div>
                     ${keywordResultsHtml}
                     ${modeIndicators}
